@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsPage</class>
+ <widget class="QScrollArea" name="scrollArea">
+  <property name="widgetResizable"><bool>true</bool></property>
+  <widget class="QWidget" name="scrollAreaWidgetContents">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1000</width>
+     <height>720</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="lblTitle">
+      <property name="text"><string>Cài đặt</string></property>
+      <property name="styleSheet"><string>font-weight:600; font-size:14pt;</string></property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabs">
+      <widget class="QWidget" name="tabGeneral">
+       <attribute name="title">
+        <string>Chung</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_general">
+        <item>
+         <layout class="QFormLayout" name="form_general">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblParkingName">
+            <property name="text"><string>Tên bãi đỗ xe</string></property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="parkingName"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblAddress">
+            <property name="text"><string>Địa chỉ</string></property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="address"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblPhone">
+            <property name="text"><string>Số điện thoại</string></property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="phone"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblEmail">
+            <property name="text"><string>Email</string></property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="email"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblTimezone">
+            <property name="text"><string>Múi giờ</string></property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="timezone">
+            <item><property name="text"><string>GMT+7 (Việt Nam)</string></property></item>
+            <item><property name="text"><string>GMT+0 (UTC)</string></property></item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveGeneral">
+          <property name="text"><string>Lưu thay đổi</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkDarkMode">
+          <property name="text"><string>Chế độ tối (Dark mode)</string></property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabPricing">
+       <attribute name="title">
+        <string>Bảng giá</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_pricing">
+        <item>
+         <widget class="QGroupBox" name="groupMotor">
+          <property name="title"><string>Giá vé lượt - Xe máy</string></property>
+          <layout class="QFormLayout" name="form_motor">
+           <item row="0" column="0"><widget class="QLabel" name="lblMotorFirst"><property name="text"><string>Giờ đầu</string></property></widget></item>
+           <item row="0" column="1"><widget class="QLineEdit" name="motor_first"/></item>
+           <item row="1" column="0"><widget class="QLabel" name="lblMotorNext"><property name="text"><string>Giờ tiếp theo</string></property></widget></item>
+           <item row="1" column="1"><widget class="QLineEdit" name="motor_next"/></item>
+           <item row="2" column="0"><widget class="QLabel" name="lblMotorMax"><property name="text"><string>Giá tối đa/ngày</string></property></widget></item>
+           <item row="2" column="1"><widget class="QLineEdit" name="motor_max"/></item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupCar">
+          <property name="title"><string>Giá vé lượt - Ô tô</string></property>
+          <layout class="QFormLayout" name="form_car">
+           <item row="0" column="0"><widget class="QLabel" name="lblCarFirst"><property name="text"><string>Giờ đầu</string></property></widget></item>
+           <item row="0" column="1"><widget class="QLineEdit" name="car_first"/></item>
+           <item row="1" column="0"><widget class="QLabel" name="lblCarNext"><property name="text"><string>Giờ tiếp theo</string></property></widget></item>
+           <item row="1" column="1"><widget class="QLineEdit" name="car_next"/></item>
+           <item row="2" column="0"><widget class="QLabel" name="lblCarMax"><property name="text"><string>Giá tối đa/ngày</string></property></widget></item>
+           <item row="2" column="1"><widget class="QLineEdit" name="car_max"/></item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupMonthly">
+          <property name="title"><string>Giá vé tháng</string></property>
+          <layout class="QFormLayout" name="form_monthly">
+           <item row="0" column="0"><widget class="QLabel" name="lblMonthlyMotor"><property name="text"><string>Xe máy</string></property></widget></item>
+           <item row="0" column="1"><widget class="QLineEdit" name="monthly_motor"/></item>
+           <item row="1" column="0"><widget class="QLabel" name="lblMonthlyCar"><property name="text"><string>Ô tô</string></property></widget></item>
+           <item row="1" column="1"><widget class="QLineEdit" name="monthly_car"/></item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="savePricing">
+          <property name="text"><string>Lưu bảng giá</string></property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabParking">
+       <attribute name="title">
+        <string>Bãi đỗ xe</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_parking">
+        <item>
+         <layout class="QFormLayout" name="form_parking">
+          <item row="0" column="0"><widget class="QLabel" name="lblTotalCar"><property name="text"><string>Tổng số chỗ đỗ ô tô</string></property></widget></item>
+          <item row="0" column="1"><widget class="QSpinBox" name="totalCar"/></item>
+          <item row="1" column="0"><widget class="QLabel" name="lblTotalMotor"><property name="text"><string>Tổng số chỗ đỗ xe máy</string></property></widget></item>
+          <item row="1" column="1"><widget class="QSpinBox" name="totalMotor"/></item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupDevices">
+          <property name="title"><string>Camera và thiết bị</string></property>
+          <layout class="QVBoxLayout" name="verticalLayout_devices">
+           <item>
+            <layout class="QHBoxLayout" name="horizontal_camEntry">
+             <item><widget class="QLabel" name="lblCamEntry"><property name="text"><string>Camera làn vào</string></property></widget></item>
+             <item><widget class="QCheckBox" name="camEntry"/></item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontal_camExit">
+             <item><widget class="QLabel" name="lblCamExit"><property name="text"><string>Camera làn ra</string></property></widget></item>
+             <item><widget class="QCheckBox" name="camExit"/></item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontal_barrier">
+             <item><widget class="QLabel" name="lblBarrier"><property name="text"><string>Barie tự động</string></property></widget></item>
+             <item><widget class="QCheckBox" name="barrierAuto"/></item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget> <!-- End QTabWidget -->
+    </item>
+   </layout>
+  </widget> <!-- End scrollAreaWidgetContents -->
+ </widget> <!-- End QScrollArea -->
+</ui>

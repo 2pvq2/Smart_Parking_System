@@ -1,0 +1,95 @@
+/* Dark theme QSS - approximated from provided CSS .dark variables */
+QWidget {
+  background: #0f172a; /* dark background */
+  color: #e6eef8; /* light foreground */
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 10pt;
+}
+
+QWidget#sidebar, SidebarWidget {
+  background: #0b1220;
+  color: #e6eef8;
+}
+
+QLabel#appTitle {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14pt;
+}
+
+QPushButton {
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10pt;
+}
+QPushButton:hover {
+  background: rgba(255,255,255,0.03);
+  color: #ffffff;
+}
+QPushButton[active="true"] {
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #3b82f6, stop:1 #8b5cf6);
+  color: white;
+  border-radius: 6px;
+  padding-left: 16px;
+}
+
+QFrame {
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+QLabel#lblTitle, QLabel#lblDashboardTitle, QLabel#lblStatistics, QLabel#lblSearch, QLabel#lblMonthly, QLabel#lblHistory, QLabel#lblSettings {
+  font-weight: 600;
+  font-size: 12pt;
+  color: #e6eef8;
+}
+
+QTableWidget {
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  gridline-color: #111827;
+}
+QHeaderView::section {
+  background: #111827;
+  padding: 6px;
+  border: none;
+  color: #e6eef8;
+  font-weight: 600;
+}
+
+QProgressBar {
+  background: #111827;
+  border-radius: 6px;
+  height: 12px;
+}
+QProgressBar::chunk {
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #34d399, stop:1 #06b6d4);
+  border-radius: 6px;
+}
+
+QPushButton#btnOpenBarrierIn {
+  background: #10b981;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+QPushButton#btnOpenBarrierOut {
+  background: #fb923c;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+QScrollBar:vertical {
+  background: transparent;
+  width: 10px;
+}
+QScrollBar::handle:vertical {
+  background: rgba(255,255,255,0.06);
+  border-radius: 5px;
+}

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StatisticsPage</class>
+ <widget class="QWidget" name="StatisticsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>900</height>
+   </rect>
+  </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="widgetResizable"><bool>true</bool></property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1000</width>
+                <height>900</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="scrollAreaLayout">
+             <item>
+                <widget class="QLabel" name="lblTitle">
+                 <property name="text"><string>Thống kê</string></property>
+                 <property name="styleSheet"><string>font-weight:600; font-size:14pt;</string></property>
+                </widget>
+             </item>
+             <!-- Summary cards -->
+             <item>
+                <widget class="QWidget" name="summaryArea">
+                 <layout class="QHBoxLayout" name="horizontalSummary">
+                    <item>
+                     <widget class="QFrame" name="cardRevenue">
+                        <layout class="QVBoxLayout" name="vertical_cardRevenue">
+                         <item>
+                            <widget class="QLabel" name="lblRevenueTitle"><property name="text"><string>Tổng doanh thu</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="totalRevenueLabel"><property name="text"><string>58.000.000đ</string></property><property name="styleSheet"><string>color:#16a34a; font-weight:600; font-size:12pt;</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="lblRevenueDelta"><property name="text"><string>+12% so với tháng trước</string></property></widget>
+                         </item>
+                        </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QFrame" name="cardVisits">
+                        <layout class="QVBoxLayout" name="vertical_cardVisits">
+                         <item>
+                            <widget class="QLabel" name="lblVisitsTitle"><property name="text"><string>Tổng lượt xe</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="totalVisitsLabel"><property name="text"><string>5.800</string></property><property name="styleSheet"><string>color:#2563eb; font-weight:600; font-size:12pt;</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="lblVisitsDelta"><property name="text"><string>+8% so với tháng trước</string></property></widget>
+                         </item>
+                        </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QFrame" name="cardMonthlyCount">
+                        <layout class="QVBoxLayout" name="vertical_cardMonthly">
+                         <item>
+                            <widget class="QLabel" name="lblMonthlyCountTitle"><property name="text"><string>Vé tháng hiện tại</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="monthlyCountLabel"><property name="text"><string>156</string></property><property name="styleSheet"><string>color:#7c3aed; font-weight:600; font-size:12pt;</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="lblMonthlyDelta"><property name="text"><string>+5% so với tháng trước</string></property></widget>
+                         </item>
+                        </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QFrame" name="cardAvg">
+                        <layout class="QVBoxLayout" name="vertical_cardAvg">
+                         <item>
+                            <widget class="QLabel" name="lblAvgTitle"><property name="text"><string>Trung bình/ngày</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="avgPerDayLabel"><property name="text"><string>193 xe</string></property><property name="styleSheet"><string>color:#ea580c; font-weight:600; font-size:12pt;</string></property></widget>
+                         </item>
+                         <item>
+                            <widget class="QLabel" name="lblAvgDelta"><property name="text"><string>+3% so với tháng trước</string></property></widget>
+                         </item>
+                        </layout>
+                     </widget>
+                    </item>
+                 </layout>
+                </widget>
+             </item>
+             <!-- Charts area -->
+             <item>
+                <widget class="QWidget" name="chartsArea">
+                 <layout class="QGridLayout" name="gridCharts">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="revenueChart">
+                        <property name="text"><string/></property>
+                        <property name="minimumSize"><size><width>400</width><height>260</height></size></property>
+                        <property name="alignment"><set>Qt::AlignCenter</set></property>
+                        <property name="styleSheet"><string>background:#ffffff; border:1px solid #e5e7eb;</string></property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="vehicleCountChart">
+                        <property name="text"><string/></property>
+                        <property name="minimumSize"><size><width>400</width><height>260</height></size></property>
+                        <property name="alignment"><set>Qt::AlignCenter</set></property>
+                        <property name="styleSheet"><string>background:#ffffff; border:1px solid #e5e7eb;</string></property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="pieVehicleChart">
+                        <property name="text"><string/></property>
+                        <property name="minimumSize"><size><width>400</width><height>260</height></size></property>
+                        <property name="alignment"><set>Qt::AlignCenter</set></property>
+                        <property name="styleSheet"><string>background:#ffffff; border:1px solid #e5e7eb;</string></property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QLabel" name="pieTicketChart">
+                        <property name="text"><string/></property>
+                        <property name="minimumSize"><size><width>400</width><height>260</height></size></property>
+                        <property name="alignment"><set>Qt::AlignCenter</set></property>
+                        <property name="styleSheet"><string>background:#ffffff; border:1px solid #e5e7eb;</string></property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0" colspan="2">
+                     <widget class="QLabel" name="hourlyChart">
+                        <property name="text"><string/></property>
+                        <property name="minimumSize"><size><width>820</width><height>260</height></size></property>
+                        <property name="alignment"><set>Qt::AlignCenter</set></property>
+                        <property name="styleSheet"><string>background:#ffffff; border:1px solid #e5e7eb;</string></property>
+                     </widget>
+                    </item>
+                 </layout>
+                </widget>
+             </item>
+            </layout>
+         </widget>
+        </widget>
+     </item>
+    </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.defaultInterpreterPath": "python",
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/*.pyc": true
+		}
+	}
+}

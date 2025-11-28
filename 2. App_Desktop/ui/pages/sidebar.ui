@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SidebarWidget</class>
+ <widget class="QWidget" name="SidebarWidget">
+  <property name="minimumSize">
+   <size>
+    <width>220</width>
+    <height>0</height>
+   </size>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="appTitle">
+     <property name="text">
+      <string>Quản lý bãi đỗ xe</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="styleSheet">
+      <string>font-weight:bold; color:#1e3a8a; padding:12px;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="nav">
+     <layout class="QVBoxLayout" name="navLayout">
+      <item>
+       <widget class="QPushButton" name="btnDashboard">
+        <property name="text"><string>Bảng điều khiển</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSearch">
+        <property name="text"><string>Tìm xe</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnMonthly">
+        <property name="text"><string>Vé tháng</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnHistory">
+        <property name="text"><string>Lịch sử ra vào</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnStatistics">
+        <property name="text"><string>Thống kê</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSettings">
+        <property name="text"><string>Cài đặt</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

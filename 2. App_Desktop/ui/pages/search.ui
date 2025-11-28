@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SearchPage</class>
+ <widget class="QWidget" name="SearchPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>640</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable"><bool>true</bool></property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>900</width>
+        <height>640</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="scrollAreaLayout">
+       <item>
+        <widget class="QLabel" name="lblTitle">
+         <property name="text"><string>Tìm xe</string></property>
+         <property name="styleSheet"><string>font-weight:600; font-size:14pt;</string></property>
+        </widget>
+       </item>
+       <!-- Search form -->
+       <item>
+        <widget class="QWidget" name="formArea">
+         <layout class="QGridLayout" name="gridLayout_form">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblPlate"><property name="text"><string>Biển số</string></property></widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="plate"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblDateFrom"><property name="text"><string>Ngày gửi từ</string></property></widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDateEdit" name="dateFrom"><property name="calendarPopup"><bool>true</bool></property></widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblDateTo"><property name="text"><string>Ngày gửi đến</string></property></widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDateEdit" name="dateTo"><property name="calendarPopup"><bool>true</bool></property></widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblTimeFrom"><property name="text"><string>Giờ gửi từ</string></property></widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QTimeEdit" name="timeFrom"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblTimeTo"><property name="text"><string>Giờ gửi đến</string></property></widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QTimeEdit" name="timeTo"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblCardNumber"><property name="text"><string>Mã thẻ</string></property></widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="cardNumber"/>
+          </item>
+          <item row="6" column="0" colspan="2">
+           <widget class="QPushButton" name="btnSearch">
+            <property name="text"><string>Tìm kiếm</string></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <!-- Results table -->
+       <item>
+        <widget class="QWidget" name="resultsArea">
+         <layout class="QVBoxLayout" name="verticalLayout_results">
+          <item>
+           <widget class="QLabel" name="lblResults"><property name="text"><string>Kết quả tìm kiếm</string></property></widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="searchResultsTable">
+            <property name="columnCount"><number>10</number></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

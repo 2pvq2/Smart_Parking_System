@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MonthlyPage</class>
+ <widget class="QWidget" name="MonthlyPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>680</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable"><bool>true</bool></property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>900</width>
+        <height>680</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="scrollAreaLayout">
+       <item>
+        <widget class="QLabel" name="lblTitle">
+         <property name="text"><string>Vé tháng</string></property>
+         <property name="styleSheet"><string>font-weight:600; font-size:14pt;</string></property>
+        </widget>
+       </item>
+       <!-- Overview: table -->
+       <item>
+        <widget class="QWidget" name="overviewArea">
+         <layout class="QVBoxLayout" name="verticalLayout_overview">
+          <item>
+           <layout class="QHBoxLayout" name="horizontal_overviewHeader">
+            <item>
+             <widget class="QLabel" name="lblOverviewTitle">
+              <property name="text"><string>Danh sách vé tháng</string></property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="monthlySearch">
+              <property name="placeholderText"><string>Tìm kiếm biển số...</string></property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="monthlyTable">
+            <property name="columnCount"><number>9</number></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <!-- Register form -->
+       <item>
+        <widget class="QWidget" name="registerArea">
+         <layout class="QVBoxLayout" name="verticalLayout_register">
+          <item>
+           <widget class="QLabel" name="lblRegisterTitle">
+            <property name="text"><string>Đăng ký vé tháng mới</string></property>
+            <property name="styleSheet"><string>font-weight:600;</string></property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_register">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblNewPlate"><property name="text"><string>Biển số *</string></property></widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="newPlate"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblNewOwner"><property name="text"><string>Chủ xe *</string></property></widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="newOwner"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lblNewCard"><property name="text"><string>Mã số thẻ *</string></property></widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="newCardNumber"/>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="lblNewType"><property name="text"><string>Loại xe *</string></property></widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="newType">
+              <item><property name="text"><string>Ô tô</string></property></item>
+              <item><property name="text"><string>Xe máy</string></property></item>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="lblNewRegDate"><property name="text"><string>Thời gian đăng ký *</string></property></widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QDateEdit" name="newRegDate"><property name="calendarPopup"><bool>true</bool></property></widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="lblNewExpDate"><property name="text"><string>Thời gian hết hạn *</string></property></widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDateEdit" name="newExpDate"><property name="calendarPopup"><bool>true</bool></property></widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="lblNewAvatar"><property name="text"><string>Ảnh đại diện</string></property></widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QPushButton" name="btnUploadAvatar"><property name="text"><string>Tải ảnh</string></property></widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontal_registerActions">
+            <item>
+             <widget class="QPushButton" name="btnRegisterSubmit"><property name="text"><string>Đồng ý</string></property></widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnRegisterCancel"><property name="text"><string>Hủy bỏ</string></property></widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

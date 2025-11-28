@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>640</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>J97 Packing - Parking Manager</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QWidget" name="sidebar">
+      <property name="minimumSize">
+       <size>
+        <width>220</width>
+        <height>0</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="appTitle">
+         <property name="text">
+          <string>J97 Packing</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="styleSheet">
+          <string>font-weight:bold; font-size:16pt; padding:12px;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnDashboard">
+         <property name="text">
+          <string>Dashboard</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnSearch">
+         <property name="text">
+          <string>Search Vehicle</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnMonthly">
+         <property name="text">
+          <string>Monthly Ticket</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnHistory">
+         <property name="text">
+          <string>Entry/Exit History</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStatistics">
+         <property name="text">
+          <string>Statistics</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnSettings">
+         <property name="text">
+          <string>Settings</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="mainArea">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QStackedWidget" name="stackedPages">
+         <!-- Page: Dashboard -->
+         <widget class="QWidget" name="pageDashboard">
+          <attribute name="title">
+           <string>Dashboard</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QWidget" name="dashboardHeader">
+             <layout class="QVBoxLayout" name="verticalLayout_header">
+              <item>
+               <widget class="QLabel" name="lblDashboardTitle">
+                <property name="text">
+                 <string>Bảng điều khiển</string>
+                </property>
+                <property name="styleSheet">
+                 <string>font-weight:600; font-size:14pt; padding:4px;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblDashboardSubtitle">
+                <property name="text">
+                 <string>Tổng quan về hoạt động bãi đỗ xe</string>
+                </property>
+                <property name="styleSheet">
+                 <string>color: #6b7280; padding-bottom:8px;</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+
+           <!-- Stats grid -->
+           <item>
+            <widget class="QWidget" name="statsArea">
+             <layout class="QGridLayout" name="gridLayout_stats">
+              <property name="columnMinimumWidth">
+               <number>0</number>
+              </property>
+              <property name="rowMinimumHeight">
+               <number>0</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QFrame" name="stat1" native="true">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_stat1">
+                 <item>
+                  <widget class="QLabel" name="stat1_label">
+                   <property name="text">
+                    <string>Xe máy đang gửi</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#4b5563;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="stat1_value">
+                   <property name="text">
+                    <string>45</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#1d4ed8; font-size:16pt; font-weight:600;</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QFrame" name="stat2" native="true">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_stat2">
+                 <item>
+                  <widget class="QLabel" name="stat2_label">
+                   <property name="text">
+                    <string>Ô tô đang gửi</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#4b5563;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="stat2_value">
+                   <property name="text">
+                    <string>23</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#16a34a; font-size:16pt; font-weight:600;</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QFrame" name="stat3" native="true">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_stat3">
+                 <item>
+                  <widget class="QLabel" name="stat3_label">
+                   <property name="text">
+                    <string>Xe đã vào</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#4b5563;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="stat3_value">
+                   <property name="text">
+                    <string>156</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#7c3aed; font-size:16pt; font-weight:600;</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QFrame" name="stat4" native="true">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_stat4">
+                 <item>
+                  <widget class="QLabel" name="stat4_label">
+                   <property name="text">
+                    <string>Xe đã ra</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#4b5563;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="stat4_value">
+                   <property name="text">
+                    <string>142</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string>color:#ea580c; font-size:16pt; font-weight:600;</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+
+           <!-- Availability -->
+           <item>
+            <widget class="QWidget" name="availabilityArea">
+             <layout class="QHBoxLayout" name="horizontalLayout_avail">
+              <item>
+               <widget class="QFrame" name="avail1">
+                <layout class="QVBoxLayout" name="verticalLayout_avail1">
+                 <item>
+                  <widget class="QLabel" name="avail1_label">
+                   <property name="text">
+                    <string>Số chỗ trống ô tô</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="avail1_value">
+                   <property name="text">
+                    <string>27 / 50 chỗ</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QProgressBar" name="avail1_progress">
+                   <property name="minimum">
+                    <number>0</number>
+                   </property>
+                   <property name="maximum">
+                    <number>100</number>
+                   </property>
+                   <property name="value">
+                    <number>54</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="avail2">
+                <layout class="QVBoxLayout" name="verticalLayout_avail2">
+                 <item>
+                  <widget class="QLabel" name="avail2_label">
+                   <property name="text">
+                    <string>Số chỗ trống xe máy</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="avail2_value">
+                   <property name="text">
+                    <string>105 / 150 chỗ</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QProgressBar" name="avail2_progress">
+                   <property name="minimum">
+                    <number>0</number>
+                   </property>
+                   <property name="maximum">
+                    <number>100</number>
+                   </property>
+                   <property name="value">
+                    <number>70</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+
+           <!-- Camera lanes -->
+           <item>
+            <widget class="QWidget" name="cameraArea">
+             <layout class="QGridLayout" name="gridLayout_cameras">
+              <item row="0" column="0">
+               <widget class="QFrame" name="cameraEntry" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_camEntry">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_camEntryHeader">
+                   <item>
+                    <widget class="QLabel" name="lblCamEntryTitle">
+                     <property name="text">
+                      <string>Camera làn vào</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="badgeEntry">
+                     <property name="text">
+                      <string>Hoạt động</string>
+                     </property>
+                     <property name="styleSheet">
+                      <string>background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; padding:2px 6px; border-radius:6px;</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="camEntryImage">
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>140</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string>background:#111827; color:white; padding:6px;</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="latestEntryFrame">
+                   <layout class="QVBoxLayout" name="verticalLayout_latestEntry">
+                    <item>
+                     <widget class="QLabel" name="latestEntry_plate">
+                      <property name="text">
+                       <string>29A-12345 • Ô tô • Vé lượt</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="latestEntry_slot">
+                      <property name="text">
+                       <string>Slot vào: A-15</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="latestEntry_time">
+                      <property name="text">
+                       <string>21/11/2024 - 14:32:15</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QFrame" name="cameraExit" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_camExit">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_camExitHeader">
+                   <item>
+                    <widget class="QLabel" name="lblCamExitTitle">
+                     <property name="text">
+                      <string>Camera làn ra</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="badgeExit">
+                     <property name="text">
+                      <string>Hoạt động</string>
+                     </property>
+                     <property name="styleSheet">
+                      <string>background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; padding:2px 6px; border-radius:6px;</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="camExitImage">
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>140</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string>background:#111827; color:white; padding:6px;</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="latestExitFrame">
+                   <layout class="QVBoxLayout" name="verticalLayout_latestExit">
+                    <item>
+                     <widget class="QLabel" name="latestExit_plate">
+                      <property name="text">
+                       <string>29B-54321 • Ô tô • Vé lượt</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="latestExit_slot">
+                      <property name="text">
+                       <string>Slot ra: B-23</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="latestExit_time_price">
+                      <property name="text">
+                       <string>21/11/2024 - 14:30:22 • 30.000đ</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+
+           <!-- Barrier control -->
+           <item>
+            <widget class="QFrame" name="barrierControl">
+             <layout class="QVBoxLayout" name="verticalLayout_barrier">
+              <item>
+               <widget class="QLabel" name="lblBarrierTitle">
+                <property name="text">
+                 <string>Điều khiển barie</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_barrierBtns">
+                <item>
+                 <widget class="QPushButton" name="btnOpenBarrierIn">
+                  <property name="text">
+                   <string>Mở barie làn vào</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string>background:#16a34a; color:white; padding:6px 12px; border-radius:6px;</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnOpenBarrierOut">
+                  <property name="text">
+                   <string>Mở barie làn ra</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string>background:#f97316; color:white; padding:6px 12px; border-radius:6px;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <!-- Page: Search Vehicle -->
+         <widget class="QWidget" name="pageSearch">
+          <attribute name="title">
+           <string>Search Vehicle</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QLabel" name="lblSearch">
+             <property name="text">
+              <string>Search Vehicle</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <!-- Page: Monthly Ticket -->
+         <widget class="QWidget" name="pageMonthly">
+          <attribute name="title">
+           <string>Monthly Ticket</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QLabel" name="lblMonthly">
+             <property name="text">
+              <string>Monthly Ticket</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <!-- Page: Entry/Exit History -->
+         <widget class="QWidget" name="pageHistory">
+          <attribute name="title">
+           <string>EntryExitHistory</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QLabel" name="lblHistory">
+             <property name="text">
+              <string>Entry / Exit History</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <!-- Page: Statistics -->
+         <widget class="QWidget" name="pageStatistics">
+          <attribute name="title">
+           <string>Statistics</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QLabel" name="lblStatistics">
+             <property name="text">
+              <string>Statistics</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <!-- Page: Settings -->
+         <widget class="QWidget" name="pageSettings">
+          <attribute name="title">
+           <string>Settings</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <item>
+            <widget class="QLabel" name="lblSettings">
+             <property name="text">
+              <string>Settings</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
