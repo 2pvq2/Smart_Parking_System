@@ -33,7 +33,7 @@
           <set>Qt::AlignCenter</set>
          </property>
          <property name="styleSheet">
-          <string>font-weight:bold; font-size:16pt; padding:12px;</string>
+          <string>font-weight:bold; font-size:16pt; padding:12px;color: #3B82F6;</string>
          </property>
         </widget>
        </item>
@@ -41,13 +41,6 @@
         <widget class="QPushButton" name="btnDashboard">
          <property name="text">
           <string>Dashboard</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnSearch">
-         <property name="text">
-          <string>Search Vehicle</string>
          </property>
         </widget>
        </item>
@@ -62,6 +55,13 @@
         <widget class="QPushButton" name="btnHistory">
          <property name="text">
           <string>Entry/Exit History</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnParkingMap">
+         <property name="text">
+          <string>Parking Status</string>
          </property>
         </widget>
        </item>
@@ -162,7 +162,7 @@
                  <item>
                   <widget class="QLabel" name="stat1_value">
                    <property name="text">
-                    <string>45</string>
+                    <string></string>
                    </property>
                    <property name="styleSheet">
                     <string>color:#1d4ed8; font-size:16pt; font-weight:600;</string>
@@ -191,7 +191,7 @@
                  <item>
                   <widget class="QLabel" name="stat2_value">
                    <property name="text">
-                    <string>23</string>
+                    <string></string>
                    </property>
                    <property name="styleSheet">
                     <string>color:#16a34a; font-size:16pt; font-weight:600;</string>
@@ -220,7 +220,7 @@
                  <item>
                   <widget class="QLabel" name="stat3_value">
                    <property name="text">
-                    <string>156</string>
+                    <string></string>
                    </property>
                    <property name="styleSheet">
                     <string>color:#7c3aed; font-size:16pt; font-weight:600;</string>
@@ -249,7 +249,7 @@
                  <item>
                   <widget class="QLabel" name="stat4_value">
                    <property name="text">
-                    <string>142</string>
+                    <string></string>
                    </property>
                    <property name="styleSheet">
                     <string>color:#ea580c; font-size:16pt; font-weight:600;</string>
@@ -273,14 +273,14 @@
                  <item>
                   <widget class="QLabel" name="avail1_label">
                    <property name="text">
-                    <string>Số chỗ trống ô tô</string>
+                    <string></string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLabel" name="avail1_value">
                    <property name="text">
-                    <string>27 / 50 chỗ</string>
+                    <string></string>
                    </property>
                   </widget>
                  </item>
@@ -306,14 +306,14 @@
                  <item>
                   <widget class="QLabel" name="avail2_label">
                    <property name="text">
-                    <string>Số chỗ trống xe máy</string>
+                    <string></string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLabel" name="avail2_value">
                    <property name="text">
-                    <string>105 / 150 chỗ</string>
+                    <string></string>
                    </property>
                   </widget>
                  </item>
@@ -372,7 +372,7 @@
                    </property>
                    <property name="minimumSize">
                     <size>
-                     <width>200</width>
+                     <width>140</width>
                      <height>140</height>
                     </size>
                    </property>
@@ -390,21 +390,21 @@
                     <item>
                      <widget class="QLabel" name="latestEntry_plate">
                       <property name="text">
-                       <string>29A-12345 • Ô tô • Vé lượt</string>
+                       <string></string>
                       </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QLabel" name="latestEntry_slot">
                       <property name="text">
-                       <string>Slot vào: A-15</string>
+                       <string> </string>
                       </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QLabel" name="latestEntry_time">
                       <property name="text">
-                       <string>21/11/2024 - 14:32:15</string>
+                       <string></string>
                       </property>
                      </widget>
                     </item>
@@ -445,7 +445,7 @@
                    </property>
                    <property name="minimumSize">
                     <size>
-                     <width>200</width>
+                     <width>140</width>
                      <height>140</height>
                     </size>
                    </property>
@@ -463,21 +463,21 @@
                     <item>
                      <widget class="QLabel" name="latestExit_plate">
                       <property name="text">
-                       <string>29B-54321 • Ô tô • Vé lượt</string>
+                       <string></string>
                       </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QLabel" name="latestExit_slot">
                       <property name="text">
-                       <string>Slot ra: B-23</string>
+                       <string></string>
                       </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QLabel" name="latestExit_time_price">
                       <property name="text">
-                       <string>21/11/2024 - 14:30:22 • 30.000đ</string>
+                       <string></string>
                       </property>
                      </widget>
                     </item>
@@ -531,34 +531,16 @@
            </item>
           </layout>
          </widget>
-         <!-- Page: Search Vehicle -->
-         <widget class="QWidget" name="pageSearch">
-          <attribute name="title">
-           <string>Search Vehicle</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <widget class="QLabel" name="lblSearch">
-             <property name="text">
-              <string>Search Vehicle</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
          <!-- Page: Monthly Ticket -->
          <widget class="QWidget" name="pageMonthly">
           <attribute name="title">
-           <string>Monthly Ticket</string>
+           <string>Vé tháng</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
             <widget class="QLabel" name="lblMonthly">
              <property name="text">
-              <string>Monthly Ticket</string>
+              <string>Vé tháng</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -570,13 +552,13 @@
          <!-- Page: Entry/Exit History -->
          <widget class="QWidget" name="pageHistory">
           <attribute name="title">
-           <string>EntryExitHistory</string>
+           <string>Lịch sử vào/ra</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
             <widget class="QLabel" name="lblHistory">
              <property name="text">
-              <string>Entry / Exit History</string>
+              <string>Lịch sử vào/ra</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -588,13 +570,13 @@
          <!-- Page: Statistics -->
          <widget class="QWidget" name="pageStatistics">
           <attribute name="title">
-           <string>Statistics</string>
+           <string>Thống kê</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
             <widget class="QLabel" name="lblStatistics">
              <property name="text">
-              <string>Statistics</string>
+              <string>Thống kê</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -606,13 +588,13 @@
          <!-- Page: Settings -->
          <widget class="QWidget" name="pageSettings">
           <attribute name="title">
-           <string>Settings</string>
+           <string>Cài đặt</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
             <widget class="QLabel" name="lblSettings">
              <property name="text">
-              <string>Settings</string>
+              <string>Cài đặt</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>

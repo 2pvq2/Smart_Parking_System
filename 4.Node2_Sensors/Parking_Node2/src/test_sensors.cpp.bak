@@ -1,0 +1,300 @@
+/*
+ * ═════════════════════════════════════════════════════════════════════
+ *  🧪 TEST SENSORS - DEBUG 10 CẢM BIẾN BÃI ĐỖ XE
+ * ═════════════════════════════════════════════════════════════════════
+ *  Chức năng:
+ *  - Đọc trực tiếp tín hiệu từ 10 GPIO
+ *  - Hiển thị giá trị RAW (HIGH/LOW) realtime
+ *  - Hiển thị trạng thái OCCUPIED/AVAILABLE
+ *  - Test debounce
+ *  - Thống kê số lần thay đổi
+ * 
+ *  Cách dùng:
+ *  1. Comment out file main.cpp trong platformio.ini
+ *  2. Build & Upload file này
+ *  3. Mở Serial Monitor (115200 baud)
+ *  4. Che/bỏ tay vào sensor để test
+ * ═════════════════════════════════════════════════════════════════════
+ */
+
+#include <Arduino.h>
+
+// ═══════════════════════════════════════════════════════════════════
+//  CẤU HÌNH CHÂN CẢM BIẾN (Giống file chính)
+// ═══════════════════════════════════════════════════════════════════
+const int SENSOR_PINS[10] = {26, 27, 14, 33, 13, 4, 16, 17, 18, 19};
+const int TOTAL_SENSORS = 10;
+const int STATUS_LED = 2;
+
+// ═══════════════════════════════════════════════════════════════════
+//  CẤU HÌNH TEST
+// ═══════════════════════════════════════════════════════════════════
+const unsigned long UPDATE_INTERVAL = 500;    // Cập nhật mỗi 500ms
+const bool INVERT_LOGIC = false;              // false: LOW=có xe, true: HIGH=có xe
+const unsigned long DEBOUNCE_TIME = 300;      // 300ms debounce
+
+// ═══════════════════════════════════════════════════════════════════
+//  STRUCT LƯU TRẠNG THÁI SENSOR
+// ═══════════════════════════════════════════════════════════════════
+struct SensorState {
+    int pin;
+    int rawValue;                  // Giá trị RAW từ digitalRead
+    bool occupied;                 // Trạng thái sau khi xử lý
+    bool previousOccupied;         // Trạng thái trước đó
+    unsigned long lastChangeTime;  // Thời gian thay đổi cuối
+    int changeCount;               // Số lần thay đổi
+};
+
+SensorState sensors[TOTAL_SENSORS];
+unsigned long lastPrintTime = 0;
+unsigned long lastBlinkTime = 0;
+bool ledState = false;
+
+// ═══════════════════════════════════════════════════════════════════
+//  FUNCTION PROTOTYPES
+// ═══════════════════════════════════════════════════════════════════
+void initializeSensors();
+void readAllSensors();
+void printHeader();
+void printSensorStatus();
+void printDetailedInfo();
+void printStatistics();
+void blinkLED();
+
+// ═══════════════════════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════════════════════
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+    
+    Serial.println("\n\n\n");
+    Serial.println("╔═══════════════════════════════════════════════════════════════════╗");
+    Serial.println("║                                                                   ║");
+    Serial.println("║            🧪 SENSOR TEST MODE - 10 PARKING SENSORS 🧪           ║");
+    Serial.println("║                                                                   ║");
+    Serial.println("║     Test tín hiệu từ 10 cảm biến bãi đỗ xe - Realtime Debug     ║");
+    Serial.println("║                                                                   ║");
+    Serial.println("╚═══════════════════════════════════════════════════════════════════╝");
+    Serial.println();
+    
+    // Khởi tạo LED
+    pinMode(STATUS_LED, OUTPUT);
+    digitalWrite(STATUS_LED, LOW);
+    
+    // Khởi tạo sensors
+    initializeSensors();
+    
+    Serial.println("\n✅ Khởi tạo hoàn tất! Bắt đầu đọc sensors...\n");
+    Serial.println("📌 Hướng dẫn:");
+    Serial.println("   - Che tay vào sensor để test");
+    Serial.println("   - Xem giá trị RAW và trạng thái thay đổi");
+    Serial.println("   - LED onboard sẽ nhấp nháy khi có hoạt động\n");
+    Serial.println("═══════════════════════════════════════════════════════════════════\n");
+    
+    delay(2000);
+    printHeader();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════════════════════════
+void loop() {
+    unsigned long currentTime = millis();
+    
+    // Đọc tất cả sensors
+    readAllSensors();
+    
+    // In status mỗi UPDATE_INTERVAL
+    if (currentTime - lastPrintTime >= UPDATE_INTERVAL) {
+        printSensorStatus();
+        lastPrintTime = currentTime;
+    }
+    
+    // Nhấp nháy LED
+    blinkLED();
+    
+    // Nhấn Enter để xem chi tiết
+    if (Serial.available()) {
+        char c = Serial.read();
+        if (c == '\n' || c == '\r') {
+            printDetailedInfo();
+            printStatistics();
+        }
+    }
+    
+    delay(50);  // Delay nhỏ để tránh CPU quá tải
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════
+
+void initializeSensors() {
+    Serial.println("🔧 Initializing sensors...\n");
+    
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        sensors[i].pin = SENSOR_PINS[i];
+        sensors[i].rawValue = 0;
+        sensors[i].occupied = false;
+        sensors[i].previousOccupied = false;
+        sensors[i].lastChangeTime = 0;
+        sensors[i].changeCount = 0;
+        
+        pinMode(sensors[i].pin, INPUT_PULLUP);
+        
+        Serial.printf("   📍 Sensor %2d → GPIO %2d (Mode: INPUT_PULLUP)\n", i + 1, sensors[i].pin);
+    }
+    
+    Serial.println();
+    Serial.printf("⚙️  Configuration:\n");
+    Serial.printf("   - Total Sensors: %d\n", TOTAL_SENSORS);
+    Serial.printf("   - Logic: %s\n", INVERT_LOGIC ? "HIGH=occupied" : "LOW=occupied");
+    Serial.printf("   - Debounce: %lu ms\n", DEBOUNCE_TIME);
+    Serial.printf("   - Update Rate: %lu ms\n", UPDATE_INTERVAL);
+}
+
+void readAllSensors() {
+    unsigned long currentTime = millis();
+    
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        // Đọc giá trị RAW
+        sensors[i].rawValue = digitalRead(sensors[i].pin);
+        
+        // Xử lý logic (invert nếu cần)
+        bool currentOccupied;
+        if (INVERT_LOGIC) {
+            currentOccupied = (sensors[i].rawValue == HIGH);
+        } else {
+            currentOccupied = (sensors[i].rawValue == LOW);
+        }
+        
+        // Debounce: Chỉ cập nhật nếu trạng thái thay đổi và đã đủ thời gian
+        if (currentOccupied != sensors[i].occupied) {
+            if (currentTime - sensors[i].lastChangeTime >= DEBOUNCE_TIME) {
+                sensors[i].previousOccupied = sensors[i].occupied;
+                sensors[i].occupied = currentOccupied;
+                sensors[i].lastChangeTime = currentTime;
+                sensors[i].changeCount++;
+                
+                // Log thay đổi
+                Serial.printf("\n🔄 [CHANGE] Sensor %d: %s → %s (Count: %d)\n",
+                             i + 1,
+                             sensors[i].previousOccupied ? "🔴 OCCUPIED" : "🟢 AVAILABLE",
+                             currentOccupied ? "🔴 OCCUPIED" : "🟢 AVAILABLE",
+                             sensors[i].changeCount);
+            }
+        }
+    }
+}
+
+void printHeader() {
+    Serial.println("┌─────────────────────────────────────────────────────────────────────────┐");
+    Serial.println("│  #  │ GPIO │  RAW  │  STATUS   │ TIME │ COUNT │      BINARY STATUS      │");
+    Serial.println("├─────────────────────────────────────────────────────────────────────────┤");
+}
+
+void printSensorStatus() {
+    // Clear previous lines (move cursor up)
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        Serial.print("\033[A");  // Move up
+    }
+    
+    String binaryStatus = "";
+    int occupiedCount = 0;
+    
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        // Tạo chuỗi binary
+        binaryStatus += sensors[i].occupied ? "1" : "0";
+        if (sensors[i].occupied) occupiedCount++;
+        
+        // In từng sensor
+        Serial.printf("│ %2d  │  %2d  │ %s │ %s │ %4lus │  %3d  │",
+                     i + 1,
+                     sensors[i].pin,
+                     sensors[i].rawValue ? "HIGH" : "LOW ",
+                     sensors[i].occupied ? "🔴 OCCUPIED " : "🟢 AVAILABLE",
+                     (millis() - sensors[i].lastChangeTime) / 1000,
+                     sensors[i].changeCount);
+        
+        // In binary status (chỉ in ở dòng đầu)
+        if (i == 0) {
+            Serial.printf(" %s │\n", binaryStatus.c_str());
+        } else {
+            Serial.println("                         │");
+        }
+    }
+    
+    Serial.println("└─────────────────────────────────────────────────────────────────────────┘");
+    Serial.printf("📊 Summary: %d occupied, %d available | Binary: %s\n", 
+                 occupiedCount, TOTAL_SENSORS - occupiedCount, binaryStatus.c_str());
+    Serial.println();
+}
+
+void printDetailedInfo() {
+    Serial.println("\n═══════════════════════════════════════════════════════════════════");
+    Serial.println("               📋 DETAILED SENSOR INFORMATION");
+    Serial.println("═══════════════════════════════════════════════════════════════════");
+    
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        Serial.printf("\n🔹 SENSOR %d (GPIO %d):\n", i + 1, sensors[i].pin);
+        Serial.printf("   └─ RAW Value: %s (%d)\n", 
+                     sensors[i].rawValue ? "HIGH" : "LOW", sensors[i].rawValue);
+        Serial.printf("   └─ Status: %s\n", 
+                     sensors[i].occupied ? "🔴 OCCUPIED" : "🟢 AVAILABLE");
+        Serial.printf("   └─ Last Change: %lu ms ago\n", 
+                     millis() - sensors[i].lastChangeTime);
+        Serial.printf("   └─ Change Count: %d times\n", sensors[i].changeCount);
+    }
+    
+    Serial.println("\n═══════════════════════════════════════════════════════════════════\n");
+}
+
+void printStatistics() {
+    Serial.println("═══════════════════════════════════════════════════════════════════");
+    Serial.println("                    📈 STATISTICS");
+    Serial.println("═══════════════════════════════════════════════════════════════════");
+    
+    int totalOccupied = 0;
+    int totalChanges = 0;
+    int maxChanges = 0;
+    int minChanges = sensors[0].changeCount;
+    
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        if (sensors[i].occupied) totalOccupied++;
+        totalChanges += sensors[i].changeCount;
+        if (sensors[i].changeCount > maxChanges) maxChanges = sensors[i].changeCount;
+        if (sensors[i].changeCount < minChanges) minChanges = sensors[i].changeCount;
+    }
+    
+    Serial.printf("🅿️  Total Sensors: %d\n", TOTAL_SENSORS);
+    Serial.printf("🔴 Occupied Slots: %d\n", totalOccupied);
+    Serial.printf("🟢 Available Slots: %d\n", TOTAL_SENSORS - totalOccupied);
+    Serial.printf("🔄 Total Changes: %d\n", totalChanges);
+    Serial.printf("📊 Max Changes (Single Sensor): %d\n", maxChanges);
+    Serial.printf("📊 Min Changes (Single Sensor): %d\n", minChanges);
+    Serial.printf("⏱️  Uptime: %lu seconds\n", millis() / 1000);
+    
+    Serial.println("═══════════════════════════════════════════════════════════════════\n");
+}
+
+void blinkLED() {
+    unsigned long currentTime = millis();
+    
+    // Nhấp nháy nhanh nếu có sensor OCCUPIED
+    bool hasOccupied = false;
+    for (int i = 0; i < TOTAL_SENSORS; i++) {
+        if (sensors[i].occupied) {
+            hasOccupied = true;
+            break;
+        }
+    }
+    
+    unsigned long blinkInterval = hasOccupied ? 200 : 1000;  // Nhanh hơn khi có xe
+    
+    if (currentTime - lastBlinkTime >= blinkInterval) {
+        ledState = !ledState;
+        digitalWrite(STATUS_LED, ledState ? HIGH : LOW);
+        lastBlinkTime = currentTime;
+    }
+}

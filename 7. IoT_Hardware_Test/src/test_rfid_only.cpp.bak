@@ -1,0 +1,148 @@
+#include <Arduino.h>
+#include <SPI.h>
+#include <MFRC522.h>
+
+// ===== CẤU HÌNH CHÂN =====
+#define SPI_MOSI        23
+#define SPI_MISO        19
+#define SPI_SCK         18
+#define RFID1_SS_PIN    5
+#define RFID1_RST_PIN   16
+#define RFID2_SS_PIN    17
+#define RFID2_RST_PIN   15
+
+MFRC522 rfid1(RFID1_SS_PIN, RFID1_RST_PIN);
+MFRC522 rfid2(RFID2_SS_PIN, RFID2_RST_PIN);
+
+void setup() {
+    Serial.begin(115200);
+    delay(2000);
+    
+    Serial.println("\n\n╔══════════════════════════════════════╗");
+    Serial.println("║   RFID TEST - Kiểm tra chi tiết     ║");
+    Serial.println("╚══════════════════════════════════════╝\n");
+    
+    // Khởi tạo SPI
+    Serial.println("1. Khởi tạo SPI Bus...");
+    Serial.printf("   MOSI: GPIO %d\n", SPI_MOSI);
+    Serial.printf("   MISO: GPIO %d\n", SPI_MISO);
+    Serial.printf("   SCK:  GPIO %d\n", SPI_SCK);
+    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+    Serial.println("   ✓ SPI OK\n");
+    
+    // Khởi tạo RFID 1
+    Serial.println("2. Khởi tạo RFID Module 1 (Lane 1)...");
+    Serial.printf("   SS:  GPIO %d\n", RFID1_SS_PIN);
+    Serial.printf("   RST: GPIO %d\n", RFID1_RST_PIN);
+    rfid1.PCD_Init();
+    delay(100);
+    
+    Serial.print("   Firmware: ");
+    rfid1.PCD_DumpVersionToSerial();
+    
+    byte v1 = rfid1.PCD_ReadRegister(rfid1.VersionReg);
+    Serial.printf("   Version Register: 0x%02X\n", v1);
+    
+    if (v1 == 0x00 || v1 == 0xFF) {
+        Serial.println("   ✗ RFID 1 KHÔNG HOẠT ĐỘNG!");
+        Serial.println("   → Kiểm tra kết nối dây");
+        Serial.println("   → Kiểm tra nguồn 3.3V");
+    } else {
+        Serial.println("   ✓ RFID 1 OK!\n");
+    }
+    
+    // Khởi tạo RFID 2
+    Serial.println("3. Khởi tạo RFID Module 2 (Lane 2)...");
+    Serial.printf("   SS:  GPIO %d\n", RFID2_SS_PIN);
+    Serial.printf("   RST: GPIO %d\n", RFID2_RST_PIN);
+    rfid2.PCD_Init();
+    delay(100);
+    
+    Serial.print("   Firmware: ");
+    rfid2.PCD_DumpVersionToSerial();
+    
+    byte v2 = rfid2.PCD_ReadRegister(rfid2.VersionReg);
+    Serial.printf("   Version Register: 0x%02X\n", v2);
+    
+    if (v2 == 0x00 || v2 == 0xFF) {
+        Serial.println("   ✗ RFID 2 KHÔNG HOẠT ĐỘNG!");
+        Serial.println("   → Kiểm tra kết nối dây");
+        Serial.println("   → Kiểm tra nguồn 3.3V");
+    } else {
+        Serial.println("   ✓ RFID 2 OK!\n");
+    }
+    
+    Serial.println("╔══════════════════════════════════════╗");
+    Serial.println("║   BẮT ĐẦU QUÉT THẺ LIÊN TỤC        ║");
+    Serial.println("║   Đặt thẻ RFID lên reader...        ║");
+    Serial.println("╚══════════════════════════════════════╝\n");
+}
+
+void loop() {
+    static unsigned long lastCheck = 0;
+    
+    // Debug mỗi 5 giây
+    if (millis() - lastCheck > 5000) {
+        Serial.println("🔍 Đang quét thẻ...");
+        lastCheck = millis();
+    }
+    
+    // Kiểm tra RFID 1
+    if (rfid1.PICC_IsNewCardPresent()) {
+        Serial.println("\n━━━ RFID 1 phát hiện thẻ! ━━━");
+        
+        if (rfid1.PICC_ReadCardSerial()) {
+            String uid = "";
+            for (byte i = 0; i < rfid1.uid.size; i++) {
+                if (rfid1.uid.uidByte[i] < 0x10) uid += "0";
+                uid += String(rfid1.uid.uidByte[i], HEX);
+            }
+            uid.toUpperCase();
+            
+            Serial.printf("🏷️  RFID LANE 1: %s\n", uid.c_str());
+            Serial.printf("   Card type: ");
+            
+            // Hiển thị loại thẻ
+            MFRC522::PICC_Type piccType = rfid1.PICC_GetType(rfid1.uid.sak);
+            Serial.println(rfid1.PICC_GetTypeName(piccType));
+            
+            rfid1.PICC_HaltA();
+            rfid1.PCD_StopCrypto1();
+            
+            Serial.println("━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+            delay(1000);
+        } else {
+            Serial.println("⚠️  RFID 1: Phát hiện thẻ nhưng không đọc được serial!");
+        }
+    }
+    
+    // Kiểm tra RFID 2
+    if (rfid2.PICC_IsNewCardPresent()) {
+        Serial.println("\n━━━ RFID 2 phát hiện thẻ! ━━━");
+        
+        if (rfid2.PICC_ReadCardSerial()) {
+            String uid = "";
+            for (byte i = 0; i < rfid2.uid.size; i++) {
+                if (rfid2.uid.uidByte[i] < 0x10) uid += "0";
+                uid += String(rfid2.uid.uidByte[i], HEX);
+            }
+            uid.toUpperCase();
+            
+            Serial.printf("🏷️  RFID LANE 2: %s\n", uid.c_str());
+            Serial.printf("   Card type: ");
+            
+            MFRC522::PICC_Type piccType = rfid2.PICC_GetType(rfid2.uid.sak);
+            Serial.println(rfid2.PICC_GetTypeName(piccType));
+            
+            rfid2.PICC_HaltA();
+            rfid2.PCD_StopCrypto1();
+            
+            Serial.println("━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+            delay(1000);
+        } else {
+            Serial.println("⚠️  RFID 2: Phát hiện thẻ nhưng không đọc được serial!");
+        }
+    }
+    
+    delay(100);
+}

@@ -57,6 +57,7 @@ def init_db():
         reg_date TEXT,         
         exp_date TEXT,         
         avatar_path TEXT,      -- Đường dẫn ảnh đại diện
+        status TEXT DEFAULT 'ACTIVE',  -- ACTIVE, EXPIRED, DELETED
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')

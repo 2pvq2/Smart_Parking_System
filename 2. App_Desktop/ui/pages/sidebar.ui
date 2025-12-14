@@ -46,6 +46,11 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btnParkingMap">
+        <property name="text"><string>🅿️ Sơ đồ bãi xe</string></property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnStatistics">
         <property name="text"><string>Thống kê</string></property>
        </widget>

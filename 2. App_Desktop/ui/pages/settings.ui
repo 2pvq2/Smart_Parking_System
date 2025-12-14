@@ -174,6 +174,66 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabUsers">
+       <attribute name="title">
+        <string>Người dùng &amp; Phân quyền</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_users">
+        <item>
+         <widget class="QGroupBox" name="groupAddUser">
+          <property name="title"><string>Thêm người dùng mới</string></property>
+          <layout class="QFormLayout" name="form_adduser">
+           <item row="0" column="0"><widget class="QLabel" name="lblNewUsername"><property name="text"><string>Tên đăng nhập</string></property></widget></item>
+           <item row="0" column="1"><widget class="QLineEdit" name="newUsername"/></item>
+           <item row="1" column="0"><widget class="QLabel" name="lblNewPassword"><property name="text"><string>Mật khẩu</string></property></widget></item>
+           <item row="1" column="1"><widget class="QLineEdit" name="newPassword"><property name="echoMode"><enum>QLineEdit::Password</enum></property></widget></item>
+           <item row="2" column="0"><widget class="QLabel" name="lblNewFullName"><property name="text"><string>Tên đầy đủ</string></property></widget></item>
+           <item row="2" column="1"><widget class="QLineEdit" name="newFullName"/></item>
+           <item row="3" column="0"><widget class="QLabel" name="lblNewRole"><property name="text"><string>Vai trò</string></property></widget></item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="newRole">
+             <item><property name="text"><string>STAFF (Nhân viên)</string></property></item>
+             <item><property name="text"><string>ADMIN (Quản trị)</string></property></item>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnAddUser">
+          <property name="text"><string>✚ Thêm người dùng</string></property>
+          <property name="styleSheet"><string>padding: 8px; background-color: #10b981; color: white; border-radius: 5px; font-weight: 600;</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupUserList">
+          <property name="title"><string>Danh sách người dùng</string></property>
+          <layout class="QVBoxLayout" name="verticalLayout_userlist">
+           <item>
+            <widget class="QTableWidget" name="usersTable">
+             <property name="columnCount"><number>5</number></property>
+             <column>
+              <property name="text"><string>ID</string></property>
+             </column>
+             <column>
+              <property name="text"><string>Tên đăng nhập</string></property>
+             </column>
+             <column>
+              <property name="text"><string>Tên đầy đủ</string></property>
+             </column>
+             <column>
+              <property name="text"><string>Vai trò</string></property>
+             </column>
+             <column>
+              <property name="text"><string>Hành động</string></property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget> <!-- End QTabWidget -->
     </item>
    </layout>

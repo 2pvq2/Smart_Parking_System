@@ -50,7 +50,7 @@
           </item>
           <item>
            <widget class="QTableWidget" name="monthlyTable">
-            <property name="columnCount"><number>9</number></property>
+            <property name="columnCount"><number>10</number></property>
            </widget>
           </item>
          </layout>
@@ -84,7 +84,20 @@
              <widget class="QLabel" name="lblNewCard"><property name="text"><string>Mã số thẻ *</string></property></widget>
             </item>
             <item row="2" column="1">
-             <widget class="QLineEdit" name="newCardNumber"/>
+             <layout class="QHBoxLayout" name="horizontalLayout_card">
+              <item>
+               <widget class="QLineEdit" name="newCardNumber">
+                <property name="readOnly"><bool>true</bool></property>
+                <property name="placeholderText"><string>Quét thẻ để lấy mã...</string></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnScanCard">
+                <property name="text"><string>Quét thẻ</string></property>
+                <property name="minimumWidth"><number>100</number></property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="lblNewType"><property name="text"><string>Loại xe *</string></property></widget>

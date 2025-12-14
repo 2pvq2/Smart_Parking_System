@@ -35,7 +35,7 @@
           <widget class="QLabel" name="stat1_label"><property name="text"><string>Xe máy đang gửi</string></property></widget>
          </item>
          <item>
-          <widget class="QLabel" name="stat1_value"><property name="text"><string>45</string></property><property name="styleSheet"><string>color:#1d4ed8; font-size:16pt; font-weight:600;</string></property></widget>
+          <widget class="QLabel" name="stat1_value"><property name="text"><string>0</string></property><property name="styleSheet"><string>color:#1d4ed8; font-size:16pt; font-weight:600;</string></property></widget>
          </item>
         </layout>
        </widget>
@@ -47,7 +47,7 @@
           <widget class="QLabel" name="stat2_label"><property name="text"><string>Ô tô đang gửi</string></property></widget>
          </item>
          <item>
-          <widget class="QLabel" name="stat2_value"><property name="text"><string>23</string></property><property name="styleSheet"><string>color:#16a34a; font-size:16pt; font-weight:600;</string></property></widget>
+          <widget class="QLabel" name="stat2_value"><property name="text"><string>0</string></property><property name="styleSheet"><string>color:#16a34a; font-size:16pt; font-weight:600;</string></property></widget>
          </item>
         </layout>
        </widget>
@@ -59,7 +59,7 @@
           <widget class="QLabel" name="stat3_label"><property name="text"><string>Xe đã vào</string></property></widget>
          </item>
          <item>
-          <widget class="QLabel" name="stat3_value"><property name="text"><string>156</string></property><property name="styleSheet"><string>color:#7c3aed; font-size:16pt; font-weight:600;</string></property></widget>
+          <widget class="QLabel" name="stat3_value"><property name="text"><string>0</string></property><property name="styleSheet"><string>color:#7c3aed; font-size:16pt; font-weight:600;</string></property></widget>
          </item>
         </layout>
        </widget>
@@ -71,7 +71,7 @@
           <widget class="QLabel" name="stat4_label"><property name="text"><string>Xe đã ra</string></property></widget>
          </item>
          <item>
-          <widget class="QLabel" name="stat4_value"><property name="text"><string>142</string></property><property name="styleSheet"><string>color:#ea580c; font-size:16pt; font-weight:600;</string></property></widget>
+          <widget class="QLabel" name="stat4_value"><property name="text"><string>0</string></property><property name="styleSheet"><string>color:#ea580c; font-size:16pt; font-weight:600;</string></property></widget>
          </item>
         </layout>
        </widget>
@@ -129,10 +129,19 @@
           <widget class="QLabel" name="lblCamEntryTitle"><property name="text"><string>Camera làn vào</string></property></widget>
          </item>
          <item>
-          <widget class="QLabel" name="camEntryImage"><property name="text"><string/></property><property name="minimumSize"><size><width>320</width><height>180</height></size></property><property name="styleSheet"><string>background:#111827; color:white; padding:6px;</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget>
+          <widget class="QLabel" name="camEntryImage"><property name="text"><string/></property><property name="minimumSize"><size><width>270</width><height>360</height></size></property><property name="styleSheet"><string>background:#111827; color:white; padding:6px;</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget>
          </item>
          <item>
-          <widget class="QFrame" name="latestEntryFrame"><layout class="QVBoxLayout" name="verticalLayout_latestEntry"><item><widget class="QLabel" name="latestEntry_plate"><property name="text"><string>29A-12345 • Ô tô • Vé lượt</string></property></widget></item><item><widget class="QLabel" name="latestEntry_slot"><property name="text"><string>Slot vào: A-15</string></property></widget></item><item><widget class="QLabel" name="latestEntry_time"><property name="text"><string>21/11/2024 - 14:32:15</string></property></widget></item></layout></widget>
+          <widget class="QFrame" name="latestEntryFrame"><layout class="QVBoxLayout" name="verticalLayout_latestEntry"><item><widget class="QLabel" name="latestEntry_plate"><property name="text"><string></string></property></widget></item><item><widget class="QLabel" name="latestEntry_slot"><property name="text"><string></string></property></widget></item><item><widget class="QLabel" name="latestEntry_time"><property name="text"><string>21/11/2024 - 14:32:15</string></property></widget></item></layout></widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbl_entry_guidance"><property name="text"><string>Sẵn sàng quét thẻ...</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="styleSheet"><string>color: #3b82f6; font-weight: bold; padding: 5px;</string></property></widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout">
+           <item><widget class="QLabel" name="lblRFID"><property name="text"><string>Mã RFID:</string></property></widget></item>
+           <item><widget class="QLineEdit" name="txt_entry_rfid"><property name="placeholderText"><string>Quét thẻ RFID...</string></property></widget></item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -144,10 +153,19 @@
           <widget class="QLabel" name="lblCamExitTitle"><property name="text"><string>Camera làn ra</string></property></widget>
          </item>
          <item>
-          <widget class="QLabel" name="camExitImage"><property name="text"><string/></property><property name="minimumSize"><size><width>320</width><height>180</height></size></property><property name="styleSheet"><string>background:#111827; color:white; padding:6px;</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget>
+          <widget class="QLabel" name="camExitImage"><property name="text"><string/></property><property name="minimumSize"><size><width>270</width><height>360</height></size></property><property name="styleSheet"><string>background:#111827; color:white; padding:6px;</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget>
          </item>
          <item>
-          <widget class="QFrame" name="latestExitFrame"><layout class="QVBoxLayout" name="verticalLayout_latestExit"><item><widget class="QLabel" name="latestExit_plate"><property name="text"><string>29B-54321 • Ô tô • Vé lượt</string></property></widget></item><item><widget class="QLabel" name="latestExit_slot"><property name="text"><string>Slot ra: B-23</string></property></widget></item><item><widget class="QLabel" name="latestExit_time_price"><property name="text"><string>21/11/2024 - 14:30:22 • 30.000đ</string></property></widget></item></layout></widget>
+          <widget class="QFrame" name="latestExitFrame"><layout class="QVBoxLayout" name="verticalLayout_latestExit"><item><widget class="QLabel" name="latestExit_plate"><property name="text"><string></string></property></widget></item><item><widget class="QLabel" name="latestExit_slot"><property name="text"><string></string></property></widget></item><item><widget class="QLabel" name="latestExit_time_price"><property name="text"><string>21/11/2024 - 14:30:22 • 30.000đ</string></property></widget></item></layout></widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbl_exit_fee"><property name="text"><string>0 VND</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="styleSheet"><string>color: #ef4444; font-size: 16px; font-weight: bold; padding: 5px;</string></property></widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout">
+           <item><widget class="QLabel" name="lblExitRFID"><property name="text"><string>RFID/Chụp:</string></property></widget></item>
+           <item><widget class="QLineEdit" name="txt_exit_rfid"><property name="placeholderText"><string>Quét thẻ hoặc Enter để chụp...</string></property></widget></item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -162,6 +180,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_barrier">
       <item>
        <widget class="QPushButton" name="btnOpenBarrierIn"><property name="text"><string>Mở barie làn vào</string></property></widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnConfirmExit"><property name="text"><string>💰 Thanh toán xe ra</string></property><property name="styleSheet"><string>background-color: #27ae60; color: white; font-weight: bold; padding: 10px;</string></property></widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnOpenBarrierOut"><property name="text"><string>Mở barie làn ra</string></property></widget>

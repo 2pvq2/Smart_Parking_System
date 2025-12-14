@@ -1,107 +1,360 @@
-/* Global app stylesheet - QSS */
+/* Light Theme - Giao diện Sáng cho Smart Parking System */
+
+/* Global Styles */
 QWidget {
-  background: #f8fafc; /* light gray */
-  color: #0f172a; /* dark slate */
-  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 10pt;
 }
 
 QMainWindow {
-  background: transparent;
+  background: #f8fafc;
 }
 
-/* Sidebar */
+/* Sidebar - Menu bên trái */
 QWidget#sidebar, SidebarWidget {
-  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0b1220, stop:1 #0f172a);
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #1e3a8a, stop:1 #0f172a);
   color: #e6eef8;
+  border-right: 2px solid #1e40af;
 }
 
 QLabel#appTitle {
-  color: #ffffff;
+  color: #ffffffff;
   font-weight: 700;
   font-size: 14pt;
+  padding: 10px;
 }
 
-/* Sidebar buttons */
-QPushButton {
+/* Sidebar Buttons */
+QWidget#sidebar QPushButton {
   background: transparent;
   color: #cbd5e1;
   border: none;
-  padding: 10px 14px;
+  padding: 12px 16px;
   text-align: left;
   font-size: 10pt;
-}
-QPushButton:hover {
-  background: rgba(255,255,255,0.04);
-  color: #ffffff;
-}
-QPushButton[active="true"] {
-  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2563eb, stop:1 #7c3aed);
-  color: white;
-  border-radius: 6px;
-  padding-left: 16px;
+  border-radius: 4px;
+  margin: 2px 8px;
 }
 
-/* Cards / frames */
+QWidget#sidebar QPushButton:hover {
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+}
+
+QWidget#sidebar QPushButton[active="true"] {
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2563eb, stop:1 #7c3aed);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding-left: 18px;
+  border-left: 4px solid #60a5fa;
+}
+
+/* ===== NÚT CHUNG (GENERAL BUTTONS) ===== */
+
+/* Nút mặc định (Xanh dương) */
+QPushButton {
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 10pt;
+}
+
+QPushButton:hover {
+  background: #2563eb;
+}
+
+QPushButton:pressed {
+  background: #1d4ed8;
+}
+
+/* Nút Đồng ý / Lưu / Xác nhận (Xanh lá) */
+QPushButton#btnRegisterSubmit,
+QPushButton#btnConfirm,
+QPushButton#btnSave,
+QPushButton#btnApplyFilter {
+  background: #10B981;
+  color: white;
+}
+
+QPushButton#btnRegisterSubmit:hover,
+QPushButton#btnConfirm:hover,
+QPushButton#btnSave:hover,
+QPushButton#btnApplyFilter:hover {
+  background: #059669;
+}
+
+/* Nút Xóa / Hủy (Đỏ) */
+QPushButton#btnDelete,
+QPushButton#btnCancel,
+QPushButton#btnRegisterCancel {
+  background: #EF4444;
+  color: white;
+}
+
+QPushButton#btnDelete:hover,
+QPushButton#btnCancel:hover,
+QPushButton#btnRegisterCancel:hover {
+  background: #DC2626;
+}
+
+/* Nút Quét thẻ (Tím) */
+QPushButton#btnScanCard {
+  background: #8B5CF6;
+  color: white;
+}
+
+QPushButton#btnScanCard:hover {
+  background: #7C3AED;
+}
+
+/* Cards / Frames */
 QFrame {
   background: #ffffff;
-  border: 1px solid #e6eef8;
-  border-radius: 8px;
-  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+QFrame#stat1, QFrame#stat2, QFrame#stat3, QFrame#stat4 {
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #ffffff, stop:1 #f1f5f9);
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+QFrame#avail1, QFrame#avail2 {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 16px;
 }
 
 /* Labels */
-QLabel#lblTitle, QLabel#lblDashboardTitle, QLabel#lblStatistics, QLabel#lblSearch, QLabel#lblMonthly, QLabel#lblHistory, QLabel#lblSettings {
-  font-weight: 600;
-  font-size: 12pt;
+QLabel#lblTitle {
+  font-weight: 700;
+  font-size: 18pt;
   color: #0f172a;
+  padding: 10px 0;
+}
+
+QLabel#lblDashboardTitle, QLabel#lblStatistics, QLabel#lblSearch, 
+QLabel#lblMonthly, QLabel#lblHistory, QLabel#lblSettings {
+  font-weight: 600;
+  font-size: 14pt;
+  color: #1e293b;
+  padding: 8px 0;
+}
+
+QLabel#stat1_label, QLabel#stat2_label, QLabel#stat3_label, QLabel#stat4_label {
+  color: #64748b;
+  font-size: 9pt;
+  font-weight: 500;
+}
+
+QLabel#stat1_value {
+  color: #1d4ed8;
+  font-size: 20pt;
+  font-weight: 700;
+}
+
+QLabel#stat2_value {
+  color: #16a34a;
+  font-size: 20pt;
+  font-weight: 700;
+}
+
+QLabel#stat3_value {
+  color: #7c3aed;
+  font-size: 20pt;
+  font-weight: 700;
+}
+
+QLabel#stat4_value {
+  color: #ea580c;
+  font-size: 20pt;
+  font-weight: 700;
+}
+
+QLabel#avail1_label, QLabel#avail2_label {
+  color: #475569;
+  font-size: 10pt;
+  font-weight: 600;
+}
+
+QLabel#avail1_value, QLabel#avail2_value {
+  color: #0f172a;
+  font-size: 14pt;
+  font-weight: 700;
 }
 
 /* Tables */
 QTableWidget {
   background: #ffffff;
-  border: 1px solid #e6eef8;
-  gridline-color: #eef2f7;
-}
-QHeaderView::section {
-  background: #f1f5f9;
-  padding: 6px;
-  border: none;
-  color: #0f172a;
-  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  gridline-color: #f1f5f9;
+  selection-background-color: #dbeafe;
 }
 
-/* Progress bars */
-QProgressBar {
-  background: #eef2f7;
-  border-radius: 6px;
-  height: 12px;
+QTableWidget::item {
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
 }
+
+QTableWidget::item:selected {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+QHeaderView::section {
+  background: #f8fafc;
+  padding: 10px;
+  border: none;
+  border-bottom: 2px solid #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 10pt;
+}
+
+/* Progress Bars */
+QProgressBar {
+  background: #e2e8f0;
+  border-radius: 8px;
+  height: 16px;
+  text-align: center;
+  border: none;
+}
+
 QProgressBar::chunk {
-  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #34d399, stop:1 #06b6d4);
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+    stop:0 #34d399, stop:0.5 #10b981, stop:1 #06b6d4);
+  border-radius: 8px;
+}
+
+/* Input Fields */
+QLineEdit, QComboBox, QDateEdit {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
   border-radius: 6px;
+  padding: 8px 12px;
+  color: #0f172a;
+  font-size: 10pt;
+}
+
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
+  border: 2px solid #3b82f6;
+  background: #f0f9ff;
 }
 
 /* Buttons */
 QPushButton#btnOpenBarrierIn {
-  background: #10b981;
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #10b981, stop:1 #059669);
   color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 10pt;
 }
+
+QPushButton#btnOpenBarrierIn:hover {
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #059669, stop:1 #047857);
+}
+
 QPushButton#btnOpenBarrierOut {
-  background: #fb923c;
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f59e0b, stop:1 #d97706);
   color: white;
-  padding: 6px 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 10pt;
+}
+
+QPushButton#btnOpenBarrierOut:hover {
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #d97706, stop:1 #b45309);
+}
+
+/* Các nút đặc biệt đã có style riêng giữ nguyên */
+QPushButton#btnUploadAvatar {
+  background: #F59E0B;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+}
+
+QPushButton#btnUploadAvatar:hover {
+  background: #D97706;
+}
+
+/* Camera Views */
+QLabel#camEntryImage, QLabel#camExitImage {
+  background: #111827;
+  border: 2px solid #374151;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+  background: #f1f5f9;
+  width: 12px;
   border-radius: 6px;
 }
 
-/* Make scrollbars subtle */
-QScrollBar:vertical {
-  background: transparent;
-  width: 10px;
-}
 QScrollBar::handle:vertical {
-  background: rgba(15,23,42,0.2);
-  border-radius: 5px;
+  background: #cbd5e1;
+  border-radius: 6px;
+  min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+  background: #94a3b8;
+}
+
+QScrollBar:horizontal {
+  background: #f1f5f9;
+  height: 12px;
+  border-radius: 6px;
+}
+
+QScrollBar::handle:horizontal {
+  background: #cbd5e1;
+  border-radius: 6px;
+  min-width: 30px;
+}
+
+QScrollBar::handle:horizontal:hover {
+  background: #94a3b8;
+}
+
+/* Scroll Area */
+QScrollArea {
+  border: none;
+  background: transparent;
+}
+
+/* Message Box */
+QMessageBox {
+  background: #ffffff;
+}
+
+QMessageBox QPushButton {
+  background: #3b82f6;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 6px;
+  min-width: 80px;
+}
+
+QMessageBox QPushButton:hover {
+  background: #2563eb;
 }

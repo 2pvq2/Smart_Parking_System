@@ -1,10 +1,15 @@
 #include "rfid_handler.h"
 
 // Tạo 2 đối tượng cho 2 đầu đọc
-MFRC522 mfrc522_1(RC522_1_SS_PIN, RC522_RST_PIN);
-MFRC522 mfrc522_2(RC522_2_SS_PIN, RC522_RST_PIN);
+MFRC522 mfrc522_1(RC522_1_SS_PIN, RC522_RST_PIN1);
+MFRC522 mfrc522_2(RC522_2_SS_PIN, RC522_RST_PIN2);
 
 void setupRFID() {
+
+    pinMode(RC522_1_SS_PIN, OUTPUT);
+    pinMode(RC522_2_SS_PIN, OUTPUT);
+    digitalWrite(RC522_1_SS_PIN, HIGH); // deselect
+    digitalWrite(RC522_2_SS_PIN, HIGH);
     // Quan trọng: Khởi tạo SPI với các chân HSPI tùy chỉnh của bạn
     SPI.begin(SPI_SCK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
     

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ParkingMapPage</class>
+ <widget class="QScrollArea" name="scrollParkingMap">
+   <property name="widgetResizable"><bool>true</bool></property>
+   <widget class="QWidget" name="ParkingMapPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="lblTitle">
+     <property name="text">
+      <string>Parking Status</string>
+     </property>
+     <property name="styleSheet">
+      <string>font-weight:600; font-size:14pt; padding: 10px;</string>
+     </property>
+    </widget>
+   </item>
+
+   <!-- Zone info -->
+   <item>
+    <widget class="QWidget" name="zoneInfo">
+     <layout class="QHBoxLayout" name="horizontalZoneInfo">
+      <item>
+       <widget class="QLabel" name="lblZoneTitle">
+        <property name="text">
+         <string>Khu vực: Bãi tổng hợp (Xe máy &amp; Ô tô)</string>
+        </property>
+        <property name="styleSheet">
+         <string>font-size:12pt; font-weight:500; padding: 5px;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblAvailableCount">
+        <property name="text">
+         <string>Chỗ trống: 10/10</string>
+        </property>
+        <property name="styleSheet">
+         <string>font-size:12pt; color:#16a34a; font-weight:600; padding: 5px;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnTestColor">
+        <property name="text">
+         <string>🧪 Test màu</string>
+        </property>
+        <property name="styleSheet">
+         <string>padding: 5px 15px; background-color: #f97316; color: white; border-radius: 5px; font-weight:600;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Legend -->
+   <item>
+    <widget class="QWidget" name="legendWidget">
+     <layout class="QHBoxLayout" name="horizontalLegend">
+      <item>
+       <widget class="QFrame" name="legendAvailable">
+        <property name="styleSheet">
+         <string>QFrame { background-color: #22c55e; border-radius: 5px; }</string>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblLegendAvailable">
+        <property name="text">
+         <string>Chỗ trống</string>
+        </property>
+        <property name="styleSheet">
+         <string>padding-left: 5px;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QFrame" name="legendOccupied">
+        <property name="styleSheet">
+         <string>QFrame { background-color: #3b82f6; border-radius: 5px; }</string>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblLegendOccupied">
+        <property name="text">
+         <string>Đã có xe</string>
+        </property>
+        <property name="styleSheet">
+         <string>padding-left: 5px;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Parking slots container -->
+   <item>
+    <widget class="QWidget" name="parkingSlotsContainer">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>500</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="gridParkingSlots">
+      <property name="spacing">
+       <number>15</number>
+      </property>
+      
+      <!-- Row 1 -->
+      <item row="0" column="0">
+       <widget class="QPushButton" name="slot_1">
+        <property name="text"><string>Slot 1</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="slot_2">
+        <property name="text"><string>Slot 2</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="slot_3">
+        <property name="text"><string>Slot 3</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="slot_4">
+        <property name="text"><string>Slot 4</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="slot_5">
+        <property name="text"><string>Slot 5</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Row 2 -->
+      <item row="1" column="0">
+       <widget class="QPushButton" name="slot_6">
+        <property name="text"><string>Slot 6</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="slot_7">
+        <property name="text"><string>Slot 7</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="slot_8">
+        <property name="text"><string>Slot 8</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="slot_9">
+        <property name="text"><string>Slot 9</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="slot_10">
+        <property name="text"><string>Slot 10</string></property>
+        <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
+        <property name="styleSheet">
+         <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+
+  </layout>
+ </widget>
+ </widget>
+</ui>

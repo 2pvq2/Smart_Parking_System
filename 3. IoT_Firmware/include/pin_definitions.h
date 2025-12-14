@@ -2,11 +2,12 @@
 #define PIN_DEFINITIONS_H
 
 // --- SPI BUS (CHUNG CHO CẢ 2 ĐẦU ĐỌC) ---
-// Lưu ý: Bạn đang dùng HSPI (14, 12, 13) thay vì VSPI mặc định
+// Lưu ý: Bạn đang dùng HSPI (14, 19, 13) thay vì VSPI mặc định
 #define SPI_SCK_PIN   14
-#define SPI_MISO_PIN  12
+#define SPI_MISO_PIN  19
 #define SPI_MOSI_PIN  13
-#define RC522_RST_PIN 16  // Chân Reset chung (hoặc dùng riêng cũng được)
+#define RC522_RST_PIN1 16  // Chân Reset chung (hoặc dùng riêng cũng được)
+#define RC522_RST_PIN2 4  // Chân Reset chung (hoặc dùng riêng cũng được)
 
 // --- ĐẦU ĐỌC 1 (LÀN VÀO) ---
 #define RC522_1_SS_PIN 5  
