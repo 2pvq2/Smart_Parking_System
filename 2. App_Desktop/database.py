@@ -31,6 +31,20 @@ def init_db():
     ''')
 
     # ==========================================
+    # 1.5. BẢNG USER_PERMISSIONS (Phân quyền chi tiết)
+    # ==========================================
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_permissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        permission_code TEXT NOT NULL, -- 'view_history', 'manage_monthly', 'collect_payment', v.v.
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        UNIQUE(user_id, permission_code)
+    )
+    ''')
+
+    # ==========================================
     # 2. BẢNG PARKING_SLOTS (Quản lý từng ô đỗ)
     # ==========================================
     # Đây là bảng quan trọng cho tính năng "Dẫn hướng đỗ xe"

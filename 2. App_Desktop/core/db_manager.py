@@ -593,6 +593,15 @@ class DBManager:
         rows = cursor.fetchall()
         conn.close()
         return rows
+    
+    def get_user_by_username(self, username):
+        """Lấy thông tin user theo username"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, full_name, role, is_active FROM users WHERE username=?", (username,))
+        row = cursor.fetchone()
+        conn.close()
+        return row
 
     def add_user(self, username, password, full_name, role):
         """Thêm người dùng mới"""
@@ -632,4 +641,100 @@ class DBManager:
             return True
         except Exception as e:
             print(f"[DB-ERROR] Lỗi update_user_role: {e}")
+            return False
+
+    # ==================== PERMISSIONS (Phân quyền chi tiết) ====================
+    
+    # Danh sách các quyền hạn khả dụng
+    AVAILABLE_PERMISSIONS = {
+        'view_history': 'Xem lịch sử giao dịch',
+        'manage_monthly': 'Quản lý vé tháng',
+        'collect_payment': 'Thu tiền xe',
+        'view_reports': 'Xem báo cáo',
+        'manage_settings': 'Quản lý cài đặt',
+        'manage_users': 'Quản lý nhân viên',
+        'export_data': 'Xuất dữ liệu',
+    }
+    
+    def add_user_permission(self, user_id, permission_code):
+        """Thêm quyền cho nhân viên"""
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO user_permissions (user_id, permission_code)
+                VALUES (?, ?)
+            """, (user_id, permission_code))
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"[DB-ERROR] Lỗi add_user_permission: {e}")
+            return False
+    
+    def remove_user_permission(self, user_id, permission_code):
+        """Xóa quyền của nhân viên"""
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
+            cursor.execute("""
+                DELETE FROM user_permissions 
+                WHERE user_id=? AND permission_code=?
+            """, (user_id, permission_code))
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"[DB-ERROR] Lỗi remove_user_permission: {e}")
+            return False
+    
+    def get_user_permissions(self, user_id):
+        """Lấy danh sách quyền của nhân viên"""
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT permission_code FROM user_permissions 
+                WHERE user_id=?
+            """, (user_id,))
+            rows = cursor.fetchall()
+            conn.close()
+            return [row[0] for row in rows]
+        except Exception as e:
+            print(f"[DB-ERROR] Lỗi get_user_permissions: {e}")
+            return []
+    
+    def has_permission(self, user_id, permission_code):
+        """Kiểm tra nhân viên có quyền hay không"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 1 FROM user_permissions 
+            WHERE user_id=? AND permission_code=?
+        """, (user_id, permission_code))
+        result = cursor.fetchone() is not None
+        conn.close()
+        return result
+    
+    def set_user_permissions(self, user_id, permission_list):
+        """Cập nhật toàn bộ quyền của nhân viên (xóa cũ, thêm mới)"""
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
+            
+            # Xóa tất cả quyền cũ
+            cursor.execute("DELETE FROM user_permissions WHERE user_id=?", (user_id,))
+            
+            # Thêm quyền mới
+            for perm in permission_list:
+                cursor.execute("""
+                    INSERT INTO user_permissions (user_id, permission_code)
+                    VALUES (?, ?)
+                """, (user_id, perm))
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"[DB-ERROR] Lỗi set_user_permissions: {e}")
             return False

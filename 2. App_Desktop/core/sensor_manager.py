@@ -13,6 +13,7 @@ class SensorDataManager(QObject):
     # ⚙️ CẤU HÌNH CÓ THỂ THAY ĐỔI
     MOTOR_SLOTS = 5  # Số slot xe máy
     CAR_SLOTS = 5    # Số slot ô tô
+    SENSOR_TIMEOUT = 60  # Timeout 60 giây - nếu không có update sẽ reset sensor data
     
     # Signal thông báo khi có thay đổi số chỗ trống
     slots_changed = Signal(dict)  # {motor_occupied, motor_available, car_occupied, car_available}
@@ -170,9 +171,42 @@ class SensorDataManager(QObject):
         time_diff = time.time() - self.sensor_data['last_update']
         return time_diff < max_age_seconds
     
+    def check_sensor_timeout(self):
+        """
+        Kiểm tra timeout của cảm biến
+        Nếu quá SENSOR_TIMEOUT giây không có update, reset sensor data về mặc định
+        Điều này tránh tình trạng UI hiển thị dữ liệu sensor cũ sau khi che cảm biến
+        """
+        if not self.sensor_data['last_update']:
+            return False
+            
+        time_diff = time.time() - self.sensor_data['last_update']
+        
+        # Nếu timeout quá lâu, reset sensor data
+        if time_diff > self.SENSOR_TIMEOUT:
+            print(f"[SENSOR-TIMEOUT] ⚠️ Không có dữ liệu sensor trong {time_diff:.1f}s, reset dữ liệu")
+            self._reset_sensor_data()
+            return True
+            
+        return False
+    
+    def _reset_sensor_data(self):
+        """Reset sensor data về trạng thái mặc định (tất cả trống)"""
+        self.sensor_data = {
+            'zone_id': None,
+            'status_binary': '0000000000',  # Reset về tất cả trống
+            'occupied_count': 0,
+            'available_count': 10,
+            'last_update': None
+        }
+        self.sensor_slot_states = [False] * 10
+        print("[SENSOR] 🔄 Đã reset sensor data về trạng thái mặc định")
+    
     @property
     def current_binary_status(self):
         """Property để dễ dàng truy cập binary status hiện tại"""
+        # Kiểm tra timeout trước khi trả về binary
+        self.check_sensor_timeout()
         return self.sensor_data['status_binary']
     
     def get_status_display(self):

@@ -803,6 +803,10 @@ class MainWindow(QMainWindow):
     def update_dashboard_with_sensor_data(self):
         """Cập nhật dashboard với dữ liệu từ cảm biến (bãi tổng hợp: 5 xe máy + 5 ô tô)"""
         try:
+            # Kiểm tra timeout - reset nếu không có update từ sensor lâu quá
+            if self.sensor_manager.check_sensor_timeout():
+                print("[DASHBOARD-UPDATE] ⚠️ Sensor timeout, dữ liệu đã được reset")
+            
             # Lấy stats từ DB
             stats = self.db.get_parking_statistics()
             
@@ -889,6 +893,15 @@ class MainWindow(QMainWindow):
                 # stats là dictionary, không phải tuple
                 available_car = stats['car_available']
                 available_motor = stats['motor_available']
+                
+                # Nếu có dữ liệu sensor fresh, dùng dữ liệu sensor thực tế
+                if self.sensor_manager.is_data_fresh():
+                    # Tính smart available từ sensor + DB
+                    motor_db_parking = stats['motor_total'] - stats['motor_available']
+                    car_db_parking = stats['car_total'] - stats['car_available']
+                    smart_counts = self.sensor_manager.get_smart_available_count(motor_db_parking, car_db_parking)
+                    available_car = smart_counts['car_available']
+                    available_motor = smart_counts['motor_available']
                 
                 # Gửi lên LCD
                 line1 = "SMART PARKING"
@@ -2438,6 +2451,9 @@ class MainWindow(QMainWindow):
         self.set_btn_add_user = widget.findChild(QPushButton, "btnAddUser")
         self.set_users_table = widget.findChild(QTableWidget, "usersTable")
         
+        # Permissions group (để chứa các checkbox quyền)
+        self.set_permissions_layout = None
+        
         # Connect buttons
         if self.set_btn_save_general:
             self.set_btn_save_general.clicked.connect(self.on_save_general_settings)
@@ -2532,6 +2548,17 @@ class MainWindow(QMainWindow):
                 return
             
             if self.db.add_user(username, password, fullname, role):
+                # Lấy ID của user vừa tạo
+                new_user = self.db.get_user_by_username(username)
+                if new_user:
+                    user_id = new_user[0]
+                    # Nếu là STAFF, mở dialog chọn quyền
+                    if role == "STAFF":
+                        self.show_permissions_dialog(user_id)
+                    else:
+                        # ADMIN tự động có tất cả quyền
+                        self.db.set_user_permissions(user_id, list(self.db.AVAILABLE_PERMISSIONS.keys()))
+                
                 QMessageBox.information(self, "Thành công", f"Đã thêm người dùng {username}!")
                 self.set_new_username.clear()
                 self.set_new_password.clear()
@@ -2568,6 +2595,59 @@ class MainWindow(QMainWindow):
         if QMessageBox.question(self, "Xác nhận", "Xác nhận xóa người dùng?") == QMessageBox.Yes:
             if self.db.delete_user(user_id):
                 self.reload_users_table()
+    
+    def show_permissions_dialog(self, user_id):
+        """Hiển thị dialog chọn quyền cho nhân viên"""
+        from PySide6.QtWidgets import QDialog, QVBoxLayout, QGroupBox, QCheckBox, QPushButton
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Phân quyền cho nhân viên")
+        dialog.setGeometry(100, 100, 400, 350)
+        
+        layout = QVBoxLayout()
+        
+        # Nhóm quyền
+        perm_group = QGroupBox("Các quyền hạn:", dialog)
+        perm_layout = QVBoxLayout()
+        
+        checkboxes = {}
+        current_permissions = self.db.get_user_permissions(user_id)
+        
+        for perm_code, perm_desc in self.db.AVAILABLE_PERMISSIONS.items():
+            checkbox = QCheckBox(perm_desc)
+            checkbox.setChecked(perm_code in current_permissions)
+            checkboxes[perm_code] = checkbox
+            perm_layout.addWidget(checkbox)
+        
+        perm_group.setLayout(perm_layout)
+        layout.addWidget(perm_group)
+        
+        # Buttons
+        btn_layout = QVBoxLayout()
+        btn_save = QPushButton("Lưu quyền")
+        btn_cancel = QPushButton("Hủy")
+        
+        def save_permissions():
+            selected_perms = [code for code, cb in checkboxes.items() if cb.isChecked()]
+            if self.db.set_user_permissions(user_id, selected_perms):
+                QMessageBox.information(dialog, "Thành công", "Đã cập nhật quyền hạn!")
+                dialog.accept()
+            else:
+                QMessageBox.critical(dialog, "Lỗi", "Lỗi lưu quyền!")
+        
+        btn_save.clicked.connect(save_permissions)
+        btn_cancel.clicked.connect(dialog.reject)
+        
+        btn_layout.addWidget(btn_save)
+        btn_layout.addWidget(btn_cancel)
+        layout.addLayout(btn_layout)
+        
+        dialog.setLayout(layout)
+        dialog.exec()
+    
+    def edit_user_permissions(self, user_id):
+        """Chỉnh sửa quyền của nhân viên hiện tại"""
+        self.show_permissions_dialog(user_id)
 
 if __name__ == "__main__":
     # Đảm bảo đã chạy file database.py để khởi tạo DB

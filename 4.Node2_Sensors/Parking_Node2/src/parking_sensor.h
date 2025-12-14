@@ -50,12 +50,19 @@ public:
     void setDebounceTime(unsigned long ms);
     void setInvertLogic(bool invert); // true = HIGH là có xe, false = LOW là có xe
     
+    // Phát hiện slot bị flicker (thay đổi quá nhanh)
+    void detectFlickers();
+    
 private:
     ParkingSlot* _slots;
     int _totalSlots;
     bool _hasChanges;
     unsigned long _debounceTime;
     bool _invertLogic;
+    
+    // Tracking flicker
+    int* _changeCount;       // Đếm số lần thay đổi
+    unsigned long* _lastChangeTime;
     
     // Helper
     bool readSensor(int pin);

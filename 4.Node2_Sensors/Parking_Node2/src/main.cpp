@@ -135,6 +135,9 @@ void loop() {
     // 4. Đọc cảm biến
     sensorManager.update();
     
+    // 4.5. Phát hiện flicker (cảm biến bị lỗi)
+    sensorManager.detectFlickers();
+    
     // 5. Gửi dữ liệu định kỳ hoặc khi có thay đổi
     unsigned long currentTime = millis();
     

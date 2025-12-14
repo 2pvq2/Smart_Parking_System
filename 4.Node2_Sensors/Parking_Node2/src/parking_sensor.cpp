@@ -3,9 +3,17 @@
 ParkingSensorManager::ParkingSensorManager(int totalSlots) {
     _totalSlots = totalSlots;
     _slots = new ParkingSlot[totalSlots];
+    _changeCount = new int[totalSlots];
+    _lastChangeTime = new unsigned long[totalSlots];
     _hasChanges = false;
     _debounceTime = 500;      // Default 500ms debounce
     _invertLogic = false;     // Default: LOW = có xe
+    
+    // Init flicker tracking
+    for (int i = 0; i < totalSlots; i++) {
+        _changeCount[i] = 0;
+        _lastChangeTime[i] = 0;
+    }
 }
 
 void ParkingSensorManager::begin(const int* pins) {
@@ -37,30 +45,36 @@ void ParkingSensorManager::update() {
     for (int i = 0; i < _totalSlots; i++) {
         bool currentState = readSensor(_slots[i].pin);
         
-        // Kiểm tra nếu có thay đổi
+        // Kiểm tra nếu có thay đổi so với trạng thái đang lưu
         if (currentState != _slots[i].occupied) {
             // Nếu đây là lần đầu phát hiện thay đổi, ghi nhận thời gian
             if (_slots[i].previousState == _slots[i].occupied) {
                 _slots[i].lastChange = now;
-                _slots[i].previousState = currentState;  // Lưu trạng thái mới tạm thời
+                _slots[i].previousState = currentState;  // Lưu state mới (tạm thời chưa xác nhận)
+                _changeCount[i]++;  // Track flicker
+                if (_changeCount[i] == 1) {
+                    _lastChangeTime[i] = now;  // Record first change time
+                }
             }
             
             // Nếu trạng thái giữ nguyên đủ lâu (debounce), xác nhận thay đổi
             if (now - _slots[i].lastChange >= _debounceTime) {
+                bool oldState = _slots[i].occupied;
                 _slots[i].occupied = currentState;
                 _hasChanges = true;
                 
-                // Debug log
-                Serial.printf("🔄 [SLOT %d] GPIO %d: %s → %s (raw=%d)\n", 
+                // Debug log - in detail
+                Serial.printf("🔄 [SLOT %d] GPIO %d: %s → %s (raw=%d, debounce=%lums)\n", 
                              _slots[i].slotId,
                              _slots[i].pin,
-                             !currentState ? "OCCUPIED" : "AVAILABLE",
-                             currentState ? "OCCUPIED" : "AVAILABLE",
-                             digitalRead(_slots[i].pin));
+                             oldState ? "OCCUPIED" : "AVAILABLE",
+                             _slots[i].occupied ? "OCCUPIED" : "AVAILABLE",
+                             digitalRead(_slots[i].pin),
+                             (now - _slots[i].lastChange));
             }
         } else {
-            // Trạng thái ổn định, reset previousState
-            _slots[i].previousState = currentState;
+            // Trạng thái ổn định, reset previousState về trạng thái hiện tại
+            _slots[i].previousState = _slots[i].occupied;
         }
     }
 }
@@ -160,4 +174,27 @@ void ParkingSensorManager::setDebounceTime(unsigned long ms) {
 void ParkingSensorManager::setInvertLogic(bool invert) {
     _invertLogic = invert;
     Serial.printf("⚙️  Sensor logic: %s\n", invert ? "HIGH=occupied" : "LOW=occupied");
+}
+void ParkingSensorManager::detectFlickers() {
+    // Phát hiện cảm biến bị "flicker" (thay đổi trạng thái quá nhanh)
+    // Nếu 1 slot thay đổi > 5 lần trong 10 giây → có vấn đề sensor
+    unsigned long now = millis();
+    
+    for (int i = 0; i < _totalSlots; i++) {
+        // Nếu thời gian từ lần thay đổi cuối cùng > 10s, reset counter
+        if (now - _lastChangeTime[i] > 10000) {
+            _changeCount[i] = 0;
+        }
+        
+        // Track thay đổi
+        if (_changeCount[i] > 0) {
+            unsigned long timeSinceFirstChange = now - _lastChangeTime[i];
+            
+            // Nếu có > 5 thay đổi trong < 2 giây
+            if (_changeCount[i] > 5 && timeSinceFirstChange < 2000) {
+                Serial.printf("⚠️  [FLICKER-ALERT] Slot %d thay đổi %d lần trong %lums - CẢM BIẾN CÓ VẤN ĐỀ!\n", 
+                             i, _changeCount[i], timeSinceFirstChange);
+            }
+        }
+    }
 }
