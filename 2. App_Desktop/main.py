@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import sys
 import os
 import time
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton, QLabel, 
                                QStackedWidget, QTableWidget, QTableWidgetItem, QLineEdit, 
                                QComboBox, QDateEdit, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene,
-                               QProgressBar, QDialog, QVBoxLayout, QHBoxLayout, QTimeEdit, QSpinBox, QCheckBox)
+                               QProgressBar, QDialog, QVBoxLayout, QHBoxLayout, QTimeEdit, QSpinBox, QCheckBox, QFrame)
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, QDate, QTime, Qt, QRectF, QTimer
 from PySide6.QtGui import QPixmap, QImage, QColor, QBrush, QPen, QFont
@@ -14,7 +16,7 @@ from PySide6.QtGui import QPixmap, QImage, QColor, QBrush, QPen, QFont
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from config import UI_PATH, PAGES_PATH, CAMERA_ENTRY_ID, CAMERA_EXIT_ID, ENABLE_AI_DETECTION
-from database import init_db # Import hàm init_db để khởi tạo DB
+from database import init_db, migrate_db # Import hàm init_db và migrate_db để khởi tạo/cập nhật DB
 from core.db_manager import DBManager
 from core.camera_thread import CameraThread
 from core.network_server import NetworkServer
@@ -207,11 +209,11 @@ class MainWindow(QMainWindow):
         self.sensor_manager.slots_changed.connect(self.on_sensor_slots_changed, Qt.QueuedConnection)
         print("[INIT] ✅ Sensor Manager initialized")
         
-        # Timer tự động refresh dashboard mỗi 5 giây
+        # Timer tự động refresh dashboard mỗi 2 giây
         self.dashboard_refresh_timer = QTimer(self)
         self.dashboard_refresh_timer.timeout.connect(self.auto_refresh_dashboard)
-        self.dashboard_refresh_timer.start(5000)  # 5000ms = 5 giây
-        print("[INIT] ✅ Auto-refresh timer started (5s interval)")
+        self.dashboard_refresh_timer.start(2000)  # 2000ms = 2 giây
+        print("[INIT] ✅ Auto-refresh timer started (2s interval)")
         
         # Khởi tạo Network Server (kết nối với ESP32)
         self.network_server = NetworkServer(host='0.0.0.0', port=8888)
@@ -232,6 +234,7 @@ class MainWindow(QMainWindow):
         
         # Tracking để tránh update UI không cần thiết
         self._last_sensor_binary = None
+        self._last_sensor_binary_time = 0  # Track thời gian binary cuối cùng được update
         
         # Timer để gửi LCD idle message định kỳ (TẠM TẮT ĐỂ DEBUG)
         # from PySide6.QtCore import QTimer
@@ -362,19 +365,15 @@ class MainWindow(QMainWindow):
         self.lbl_stat4_value = widget.findChild(QLabel, "stat4_value")  # Xe đã ra
         
         # Chỗ trống
-        self.lbl_avail1_value = widget.findChild(QLabel, "avail1_value")  # Chỗ trống ô tô
+        self.lbl_avail1_value = widget.findChild(QLabel, "avail1_value")
         self.lbl_avail1_progress = widget.findChild(QProgressBar, "avail1_progress")
-        self.lbl_avail2_value = widget.findChild(QLabel, "avail2_value")  # Chỗ trống xe máy
+        self.lbl_avail2_value = widget.findChild(QLabel, "avail2_value")
         self.lbl_avail2_progress = widget.findChild(QProgressBar, "avail2_progress")
         
         # Buttons barie và thanh toán
         self.btn_open_barrier_in = widget.findChild(QPushButton, "btnOpenBarrierIn")
         self.btn_open_barrier_out = widget.findChild(QPushButton, "btnOpenBarrierOut")
         self.btn_confirm_exit = widget.findChild(QPushButton, "btnConfirmExit")
-        
-        print(f"[DEBUG] latestEntry_plate found: {self.lbl_entry_plate is not None}")
-        print(f"[DEBUG] latestExit_plate found: {self.lbl_exit_plate is not None}")
-        print(f"[DEBUG] btnConfirmExit found: {self.btn_confirm_exit is not None}")
         
         # Kết nối sự kiện RFID
         if self.txt_entry_rfid:
@@ -522,7 +521,7 @@ class MainWindow(QMainWindow):
         
         QTimer.singleShot(auto_clear_seconds * 1000, clear_exit)
     
-    def clear_exit_lane_after_timeout(self, seconds=3):
+    def clear_exit_lane_after_timeout(self, seconds=10):
         """Clear exit lane info sau khi xe ra được N giây"""
         def clear():
             if self.lbl_exit_plate:
@@ -532,6 +531,8 @@ class MainWindow(QMainWindow):
                 self.lbl_exit_time_price.setText("")
             if self.lbl_exit_fee:
                 self.lbl_exit_fee.setText("")
+            if self.lbl_exit_slot:
+                self.lbl_exit_slot.setText("")
         
         QTimer.singleShot(seconds * 1000, clear)
 
@@ -563,36 +564,33 @@ class MainWindow(QMainWindow):
             self.current_entry_vehicle_type = vehicle_type  # Lưu loại xe
             
             # Tự động trigger logic xử lý khi có biển số mới
-            if self.txt_entry_rfid and self.txt_entry_rfid.text().strip():
-                # Nếu đã có RFID, tự động kiểm tra
-                self.handle_rfid_scan()
-            else:
-                # Chưa có RFID, hiển thị hướng dẫn
-                if self.lbl_entry_guidance:
-                    self.lbl_entry_guidance.setText(f"✅ {vehicle_icon} {vehicle_type} - Vui lòng quét thẻ RFID")
+            if self.lbl_entry_guidance:
+                if self.txt_entry_rfid and self.txt_entry_rfid.text().strip():
+                    self.lbl_entry_guidance.setText(
+                        f"✅ Đã có RFID - Nhấn Enter để xác nhận"
+                    )
+                else:
+                    self.lbl_entry_guidance.setText(
+                        f"✅ {vehicle_icon} {vehicle_type} - Vui lòng quét thẻ RFID"
+                    )
             
     def update_exit_lpr(self, plate_text):
         print(f"[DEBUG] update_exit_lpr called with: {plate_text}")
-        
-        # Lọc ra biển số hợp lệ
+
         if plate_text and plate_text != "..." and not plate_text.startswith("LỖI"):
             if self.lbl_exit_plate:
-                # Cập nhật thông tin biển số ra
                 self.lbl_exit_plate.setText(f"🚗 {plate_text}")
-                print(f"[DEBUG] Exit plate updated: {plate_text}")
-                
-                # Cập nhật thời gian
-                if self.lbl_exit_time_price:
-                    from datetime import datetime
-                    current_time = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
-                    self.lbl_exit_time_price.setText(f"Thời gian: {current_time}")
-            else:
-                print("[DEBUG] lbl_exit_plate is None!")
-                
+
+            if self.lbl_exit_time_price:
+                from datetime import datetime
+                current_time = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
+                self.lbl_exit_time_price.setText(f"Thời gian: {current_time}")
+
             self.current_exit_plate = plate_text
-            
-            # Tự động tính phí khi nhận diện được biển số
-            self.calculate_fee_and_display(plate_text)
+
+            # ✅ CHỈ hiển thị hướng dẫn
+            if self.lbl_exit_fee:
+                self.lbl_exit_fee.setText("✅ Đã nhận diện biển số - Vui lòng xác nhận")
 
     def start_cameras(self):
         dashboard = self.loaded_pages.get("dashboard")
@@ -767,6 +765,7 @@ class MainWindow(QMainWindow):
             occupied: Số slot có xe
             available: Số slot trống
         """
+        import time
         print(f"[SENSOR-HANDLER] Zone {zone_id}: {status_binary} | "
               f"Occupied={occupied}, Available={available}")
         
@@ -774,17 +773,27 @@ class MainWindow(QMainWindow):
         self.sensor_manager.update_from_node(zone_id, status_binary, occupied, available)
         
         # CHỈ update UI nếu binary status THAY ĐỔI
+        # VÀ cách lần update cuối cùng > 1 giây (debounce filter để tránh flicker)
         if self._last_sensor_binary != status_binary:
-            print(f"[SENSOR-CHANGE-DETECTED] Binary changed: {self._last_sensor_binary} → {status_binary}")
-            self._last_sensor_binary = status_binary
+            current_time = time.time()
+            time_since_last_update = current_time - self._last_sensor_binary_time
             
-            # Cập nhật dashboard
-            self.update_dashboard_with_sensor_data()
-            
-            # Gửi thông tin cập nhật lên LCD
-            self.send_idle_lcd_message()
+            if time_since_last_update >= 1.0:  # >= 1 giây từ lần update cuối
+                print(f"[SENSOR-CHANGE-DETECTED] Binary changed: {self._last_sensor_binary} → {status_binary}")
+                self._last_sensor_binary = status_binary
+                self._last_sensor_binary_time = current_time
+                
+                # Cập nhật dashboard
+                self.update_dashboard_with_sensor_data()
+                
+                # Gửi thông tin cập nhật lên LCD
+                self.send_idle_lcd_message()
+            else:
+                # Bỏ qua - thay đổi quá nhanh (flicker)
+                print(f"[SENSOR-FLICKER] Ignored rapid change: {status_binary} (only {time_since_last_update:.2f}s since last update)")
         else:
             # Binary không đổi - KHÔNG update UI (giảm spam)
+            self._last_sensor_binary_time = time.time()  # Update timestamp dù không thay đổi binary
             pass
     
     def on_sensor_slots_changed(self, data):
@@ -803,10 +812,6 @@ class MainWindow(QMainWindow):
     def update_dashboard_with_sensor_data(self):
         """Cập nhật dashboard với dữ liệu từ cảm biến (bãi tổng hợp: 5 xe máy + 5 ô tô)"""
         try:
-            # Kiểm tra timeout - reset nếu không có update từ sensor lâu quá
-            if self.sensor_manager.check_sensor_timeout():
-                print("[DASHBOARD-UPDATE] ⚠️ Sensor timeout, dữ liệu đã được reset")
-            
             # Lấy stats từ DB
             stats = self.db.get_parking_statistics()
             
@@ -815,13 +820,14 @@ class MainWindow(QMainWindow):
             car_db_parking = stats['car_total'] - stats['car_available']
             
             # Lấy binary status từ sensor (10 bits)
-            sensor_binary = self.sensor_manager.sensor_data.get('status_binary', '0000000000')
+            # Dùng current_binary_status property để auto-check timeout & reset nếu cần
+            sensor_binary = self.sensor_manager.current_binary_status
             
             # Chia sensor thành 2 phần:
-            # - Slot 0-4 (5 bits đầu): Xe máy
-            # - Slot 5-9 (5 bits cuối): Ô tô
-            motor_binary = sensor_binary[0:MOTOR_SLOTS]  # MOTOR_SLOTS bits đầu
-            car_binary = sensor_binary[MOTOR_SLOTS:MOTOR_SLOTS+CAR_SLOTS]   # CAR_SLOTS bits cuối
+            # - Slot 0-4 (5 bits đầu): Ô tô
+            # - Slot 5-9 (5 bits cuối): Xe máy
+            car_binary = sensor_binary[0:CAR_SLOTS]  # CAR_SLOTS bits đầu
+            motor_binary = sensor_binary[CAR_SLOTS:CAR_SLOTS+MOTOR_SLOTS]   # MOTOR_SLOTS bits cuối
             
             # Đếm số chỗ trống từ sensor
             motor_sensor_available = motor_binary.count('0')  # 0 = available
@@ -850,20 +856,27 @@ class MainWindow(QMainWindow):
                     self.lbl_avail1_value.setStyleSheet("color: #22c55e; font-weight: bold;")
                 else:
                     self.lbl_avail1_value.setStyleSheet("")
+            else:
+                print("[DASHBOARD-UPDATE-UI] ⚠️ lbl_avail1_value is None!")
             
             if self.lbl_avail1_progress:
                 percentage = int((car_available_smart / CAR_SLOTS) * 100)
                 self.lbl_avail1_progress.setValue(percentage)
+                print(f"[DASHBOARD-UPDATE-UI] lbl_avail1_progress set to: {percentage}%")
             
             # Cập nhật chỗ trống xe máy (dùng sensor + DB)
             if self.lbl_avail2_value:
-                self.lbl_avail2_value.setText(f"{motor_available_smart} / {MOTOR_SLOTS} chỗ")
+                text = f"{motor_available_smart} / {MOTOR_SLOTS} chỗ"
+                self.lbl_avail2_value.setText(text)
+                print(f"[DASHBOARD-UPDATE-UI] lbl_avail2_value set to: {text}")
                 
                 # Thêm indicator nếu có dữ liệu cảm biến fresh
                 if self.sensor_manager.is_data_fresh():
                     self.lbl_avail2_value.setStyleSheet("color: #22c55e; font-weight: bold;")
                 else:
                     self.lbl_avail2_value.setStyleSheet("")
+            else:
+                print("[DASHBOARD-UPDATE-UI] ⚠️ lbl_avail2_value is None!")
             
             if self.lbl_avail2_progress:
                 percentage = int((motor_available_smart / MOTOR_SLOTS) * 100)
@@ -960,7 +973,6 @@ class MainWindow(QMainWindow):
             self._last_processed_card = ""
         
         self.current_entry_card = rfid
-        self._last_processed_card = rfid
         print(f"[DEBUG] ✅ Xử lý thẻ mới: '{rfid}'")
         
         if not rfid:
@@ -994,6 +1006,11 @@ class MainWindow(QMainWindow):
         print(f"[DEBUG] ✅ on_entry_capture_complete() được gọi!")
         print(f"[ENTRY] Nhận được kết quả: {plate_text}")
         
+        # Lưu ảnh vào file
+        image_in_path = self.save_capture_image(captured_image, "entry")
+        if image_in_path:
+            print(f"[ENTRY-IMAGE] Lưu ảnh vào: {image_in_path}")
+        
         # Hiển thị ảnh vừa chụp lên UI
         dashboard = self.loaded_pages.get("dashboard")
         if dashboard:
@@ -1011,6 +1028,9 @@ class MainWindow(QMainWindow):
         # Xử lý logic vé tháng/vãng lai
         rfid = self.current_entry_card
         ticket_info = self.db.get_monthly_ticket_info(rfid)
+        
+        # Lưu image path để truyền vào record_entry()
+        self._current_entry_image_path = image_in_path
         
         if ticket_info:
             plate_db = ticket_info['plate_number']
@@ -1080,12 +1100,20 @@ class MainWindow(QMainWindow):
         """Xử lý sau khi camera cổng ra chụp ảnh và nhận diện xong"""
         print(f"[EXIT] Nhận được kết quả: {plate_text}")
         
+        # Lưu ảnh vào file
+        image_out_path = self.save_capture_image(captured_image, "exit")
+        if image_out_path:
+            print(f"[EXIT-IMAGE] Lưu ảnh vào: {image_out_path}")
+        
         # Hiển thị ảnh vừa chụp lên UI
         dashboard = self.loaded_pages.get("dashboard")
         if dashboard:
             lbl_exit = dashboard.findChild(QLabel, "camExitImage")
             if lbl_exit:
                 lbl_exit.setPixmap(QPixmap.fromImage(captured_image))
+        
+        # Lưu image path để truyền vào record_exit()
+        self._current_exit_image_path = image_out_path
         
         # Cập nhật thông tin biển số và tính phí
         self.update_exit_lpr(plate_text)
@@ -1112,9 +1140,13 @@ class MainWindow(QMainWindow):
                 return
         
         # Ghi nhận xe vào
-        success = self.db.record_entry(card_id, plate, vehicle_type, assigned_slot, 'MONTHLY')
+        image_path = getattr(self, '_current_entry_image_path', None)
+        success = self.db.record_entry(card_id, plate, vehicle_type, assigned_slot, 'MONTHLY', image_path)
         
         if success:
+            # Set debounce flag để tránh xử lý lại cùng thẻ
+            self._last_processed_card = card_id
+            
             # Gửi thông tin lên LCD ESP32
             owner_name = ticket_info.get('owner_name', '')
             self.send_vehicle_info_to_lcd(plate, vehicle_type, assigned_slot, owner_name)
@@ -1129,17 +1161,24 @@ class MainWindow(QMainWindow):
             # Cập nhật slot trên dashboard
             if self.lbl_entry_slot:
                 self.lbl_entry_slot.setText(assigned_slot)
+                print(f"[DASHBOARD] ✅ Entry slot updated: {assigned_slot}")
+            else:
+                print(f"[DASHBOARD] ⚠️ lbl_entry_slot is None!")
             
             # Cập nhật slot info
             self.send_slot_info_to_esp()
             
-            # Reset sau 3 giây
+            # Reset sau 10 giây
             from PySide6.QtCore import QTimer
-            QTimer.singleShot(3000, self.reset_entry_ui)
+            QTimer.singleShot(10000, self.reset_entry_ui)
             
             # Cập nhật UI
             self.draw_parking_map()
             self.update_dashboard_stats()
+
+            #Cập nhật lịch sử ra vào
+            self.refresh_history_if_visible()
+
         else:
             error_msg = "Không thể ghi nhận xe vào."
             self.display_entry_lane_error(error_msg, auto_clear_seconds=5)
@@ -1158,14 +1197,21 @@ class MainWindow(QMainWindow):
         assigned_slot = self.db.find_available_slot(vehicle_type, is_monthly=False)
         
         if not assigned_slot:
-            # Kiểm tra thông tin chi tiết
-            stats = self.db.get_parking_statistics()
-            if vehicle_type == "Ô tô":
-                available = stats['car_available']
-                total = stats['car_total']
-            else:
-                available = stats['motor_available']
-                total = stats['motor_total']
+            # Kiểm tra thông tin chi tiết - dùng guest-available slots (bỏ qua reserved)
+            # Ưu tiên dùng sensor data nếu có sẵn (accurate real-time data)
+            available, total = self.db.get_available_slots_for_guests(vehicle_type)
+            
+            # Nếu sensor có data fresh, dùng sensor available count thay vì DB
+            if self.sensor_manager.is_data_fresh():
+                stats = self.db.get_parking_statistics()
+                if vehicle_type == 'Ô tó':
+                    available = stats['car_guest_available']
+                    total = stats['car_guest_total']
+                    print(f"[ENTRY-SENSOR] Using sensor data: Car GUEST available={available}/{total}")
+                elif vehicle_type == 'Xe máy':
+                    available = stats['motor_guest_available']
+                    total = stats['motor_guest_total']
+                    print(f"[ENTRY-SENSOR] Using sensor data: Motor GUEST available={available}/{total}")
             
             error_msg = f"❌ Bãi đầy! {vehicle_type}: {available}/{total} chỗ trống"
             print(f"[ENTRY ERROR] {error_msg}")
@@ -1178,20 +1224,27 @@ class MainWindow(QMainWindow):
             else:
                 print(f"[ESP-LCD] ⚠️ ESP32 chưa kết nối, không thể gửi LCD")
             
-            # Reset UI về trạng thái ban đầu sau 3 giây
+            # Reset UI về trạng thái ban đầu sau 10 giây
             from PySide6.QtCore import QTimer
-            QTimer.singleShot(3000, self.reset_entry_ui)
+            QTimer.singleShot(10000, self.reset_entry_ui)
             return
         
         # Ghi nhận xe vào
-        success = self.db.record_entry(card_id, plate, vehicle_type, assigned_slot, ticket_type)
+        image_path = getattr(self, '_current_entry_image_path', None)
+        success = self.db.record_entry(card_id, plate, vehicle_type, assigned_slot, ticket_type, image_path)
         
         if success:
+            # Set debounce flag để tránh xử lý lại cùng thẻ
+            self._last_processed_card = card_id
+            
             # Gửi thông tin lên LCD ESP32
             self.send_vehicle_info_to_lcd(plate, vehicle_type, assigned_slot)
             
             # Tự động mở barie
             self.handle_open_barrier_in()
+            # Cập nhật lịch sử ra vào 
+            self.refresh_history_if_visible()
+
             
             # Hiển thị thông báo ngắn
             self.lbl_entry_guidance.setText(f"✅ Vãng lai vào tại: {assigned_slot} - 🚧 Barie đã mở")
@@ -1200,10 +1253,13 @@ class MainWindow(QMainWindow):
             # Cập nhật slot trên dashboard
             if self.lbl_entry_slot:
                 self.lbl_entry_slot.setText(assigned_slot)
+                print(f"[DASHBOARD] ✅ Entry slot updated: {assigned_slot}")
+            else:
+                print(f"[DASHBOARD] ⚠️ lbl_entry_slot is None!")
             
-            # Reset sau 3 giây
+            # Reset sau 10 giây
             from PySide6.QtCore import QTimer
-            QTimer.singleShot(3000, self.reset_entry_ui)
+            QTimer.singleShot(10000, self.reset_entry_ui)
             
             # Cập nhật UI
             self.draw_parking_map()
@@ -1263,8 +1319,7 @@ class MainWindow(QMainWindow):
             self.lbl_entry_plate.setText("...")
         if self.txt_entry_rfid:
             self.txt_entry_rfid.clear()
-        if self.lbl_entry_guidance:
-            self.lbl_entry_guidance.setText("✅ Sẵn sàng quét thẻ...")
+        
         
         # Gửi idle message lên LCD
         if hasattr(self, 'network_server') and self.network_server.is_connected():
@@ -1400,6 +1455,13 @@ class MainWindow(QMainWindow):
         ticket_type = session[10] # ticket_type ở index 10
         slot_id = session[13] if len(session) > 13 else None # slot_id ở index 13 (mới thêm)
         
+        # Hiển thị thông tin chỗ đỗ
+        if slot_id and self.lbl_exit_slot:
+            self.lbl_exit_slot.setText(f"Ô đỗ: {slot_id}")
+            print(f"[DASHBOARD] ✅ Exit slot updated: {slot_id}")
+        elif self.lbl_exit_slot:
+            print(f"[DASHBOARD] ⚠️ slot_id is None!")
+        
         # Kiểm tra vé tháng - MIỄN PHÍ
         if ticket_type == 'MONTHLY':
             self.lbl_exit_fee.setText("✅ VÉ THÁNG - MIỄN PHÍ")
@@ -1407,38 +1469,41 @@ class MainWindow(QMainWindow):
             self.send_vehicle_info_to_lcd(exit_plate, vehicle_type, slot_id, "VE THANG")
             # Tự động xử lý xe ra cho vé tháng
             self.auto_process_monthly_exit(exit_plate, session[0])
-            return 0, session[0], session[3], 'MONTHLY'
+            return 0, session[0], slot_id, 'MONTHLY'
         
-        fee = calculate_parking_fee(self.db, vehicle_type, time_in_str, time.time())
+        # Tính phí và thời gian đỗ
+        current_time_seconds = time.time()
+        fee = calculate_parking_fee(self.db, vehicle_type, time_in_str, current_time_seconds)
         
+        # Tính thời gian đỗ (phải dùng cách tính giống hệt như calculate_parking_fee)
         time_in = time.mktime(time.strptime(time_in_str, "%Y-%m-%d %H:%M:%S"))
-        parking_duration_minutes = (time.time() - time_in) / 60
+        parking_duration_minutes = (current_time_seconds - time_in) / 60
         
         self.lbl_exit_fee.setText(f"{fee:,} VND ({int(parking_duration_minutes)} phút)")
+        print(f"[FEE] Exit plate: {exit_plate}, Duration: {int(parking_duration_minutes)} mins, Fee: {fee}")
         
         # Gửi thông tin xe và phí lên LCD
         self.send_vehicle_info_to_lcd(exit_plate, vehicle_type, slot_id)
         self.send_fee_to_lcd(fee)
         
-        return fee, session[0], session[3], ticket_type # fee, id, slot_id, ticket_type
+        return fee, session[0], slot_id, ticket_type # fee, id, slot_id, ticket_type
     
     def auto_process_monthly_exit(self, plate, session_id):
-        """Tự động xử lý xe vé tháng ra khỏi bãi"""
-        success = self.db.record_exit(session_id, plate, 0, 'MONTHLY')
-        
+        image_path = getattr(self, '_current_exit_image_path', None)
+        success = self.db.record_exit(session_id, plate, 0, 'MONTHLY', image_path)
+
         if success:
-            # Tự động mở barie
             self.handle_open_barrier_out()
-            
-            print(f"[AUTO] Khách tháng {plate} ra - Miễn phí")
-            
-            # Reset UI sau 3 giây
-            from PySide6.QtCore import QTimer
-            QTimer.singleShot(3000, self.reset_exit_ui)
-            
-            # Cập nhật UI
+        # ✅ RESET debounce cho thẻ
+            self._last_processed_card = ""
+
+            self.clear_exit_lane_after_timeout(seconds=10)
+            self.reset_exit_ui()
             self.draw_parking_map()
             self.update_dashboard_stats()
+            self.refresh_history_if_visible()
+
+
         else:
             error_msg = "Không thể ghi nhận xe ra."
             self.display_exit_lane_error(error_msg, auto_clear_seconds=5)
@@ -1485,19 +1550,26 @@ class MainWindow(QMainWindow):
         
         # Thanh toán thành công -> Ghi nhận xe ra
         payment_method = payment_dialog.payment_method
-        success = self.db.record_exit(session_id, exit_plate, fee, payment_method)
+        image_path = getattr(self, '_current_exit_image_path', None)
+        success = self.db.record_exit(session_id, exit_plate, fee, payment_method, image_path)
         
         if success:
             # Tự động mở barie
             self.handle_open_barrier_out()
+            # ✅ RESET debounce để thẻ dùng lại được
+            self._last_processed_card = ""
+
+            self.refresh_history_if_visible()
+
+
             
             QMessageBox.information(self, "Xe Ra Thành Công", 
                 f"✅ Đã thanh toán {fee:,} VND\n"
                 f"Phương thức: {payment_method}\n"
                 f"🚧 Barie đã mở!")
             
-            # Clear exit lane info after 3 seconds (successful exit)
-            self.clear_exit_lane_after_timeout(seconds=3)
+            # Clear exit lane info after 10 seconds (successful exit)
+            self.clear_exit_lane_after_timeout(seconds=10)
             
             self.current_exit_plate = "..."
             if self.lbl_exit_plate:
@@ -1507,6 +1579,9 @@ class MainWindow(QMainWindow):
             
             # Reset exit processing flag
             self._exit_processing = False
+            
+            # Reset entry UI để thẻ này có thể dùng lại cho xe khác
+            self.reset_entry_ui()
             
             self.draw_parking_map()
             self.update_dashboard_stats()  # Cập nhật thống kê
@@ -2026,25 +2101,8 @@ class MainWindow(QMainWindow):
         if self.lbl_stat4_value:
             self.lbl_stat4_value.setText(str(stats['total_out_today']))
         
-        # Cập nhật chỗ trống ô tô
-        if self.lbl_avail1_value:
-            self.lbl_avail1_value.setText(f"{stats['car_available']} / {stats['car_total']} chỗ")
-        if self.lbl_avail1_progress:
-            if stats['car_total'] > 0:
-                percentage = int((stats['car_available'] / stats['car_total']) * 100)
-                self.lbl_avail1_progress.setValue(percentage)
-            else:
-                self.lbl_avail1_progress.setValue(0)
-        
-        # Cập nhật chỗ trống xe máy
-        if self.lbl_avail2_value:
-            self.lbl_avail2_value.setText(f"{stats['motor_available']} / {stats['motor_total']} chỗ")
-        if self.lbl_avail2_progress:
-            if stats['motor_total'] > 0:
-                percentage = int((stats['motor_available'] / stats['motor_total']) * 100)
-                self.lbl_avail2_progress.setValue(percentage)
-            else:
-                self.lbl_avail2_progress.setValue(0)
+        # Cập nhật chỗ trống dùng sensor + DB logic (smart parking)
+        self.update_dashboard_with_sensor_data()
 
     def auto_refresh_dashboard(self):
         """Tự động refresh dashboard nếu đang ở trang dashboard"""
@@ -2083,7 +2141,7 @@ class MainWindow(QMainWindow):
         date_from = widget.findChild(QDateEdit, "historyDateFrom")
         date_to = widget.findChild(QDateEdit, "historyDateTo")
         if date_from:
-            date_from.setDate(QDate.currentDate().addDays(-7))
+            date_from.setDate(QDate.currentDate().addDays(-30))
             print(f"[HISTORY] Date from: {date_from.date().toString('yyyy-MM-dd')}")
         if date_to:
             date_to.setDate(QDate.currentDate())
@@ -2099,15 +2157,22 @@ class MainWindow(QMainWindow):
         """Thiết lập trang sơ đồ bãi đỗ xe với 10 slots realtime"""
         print("[PARKING-MAP] Initializing parking map page...")
         
-        # Lưu tham chiếu các slots
+        # Lưu tham chiếu các slots từ database
         self.parking_slots = []
-        for i in range(1, 11):
-            slot = widget.findChild(QPushButton, f"slot_{i}")
-            if slot:
-                self.parking_slots.append(slot)
-                print(f"[PARKING-MAP] Slot {i} found")
+        self.parking_slot_ids = []
+        
+        # Load tất cả slots từ database
+        all_slots_from_db = self.db.get_all_parking_slots()
+        
+        for i, db_slot in enumerate(all_slots_from_db):
+            slot_id, vehicle_type, is_reserved, status = db_slot
+            slot_widget = widget.findChild(QPushButton, f"slot_{i+1}")
+            if slot_widget:
+                self.parking_slots.append(slot_widget)
+                self.parking_slot_ids.append(slot_id)  # Lưu tên slot thực tế từ DB
+                print(f"[PARKING-MAP] Slot {i+1} (ID: {slot_id}) found")
             else:
-                print(f"[PARKING-MAP] ⚠️ Slot {i} NOT found")
+                print(f"[PARKING-MAP] ⚠️ Slot {i+1} NOT found")
         
         # Lưu tham chiếu labels
         self.lbl_parking_zone_title = widget.findChild(QLabel, "lblZoneTitle")
@@ -2175,8 +2240,9 @@ class MainWindow(QMainWindow):
                 slot_widget.setStyleSheet(f"QPushButton {{ {color_available} }}")
                 available_count += 1
             
-            # Cập nhật text (giữ nguyên "Slot X")
-            slot_widget.setText(f"Slot {i+1}")
+            # Cập nhật text với tên slot thực tế từ database
+            slot_name = self.parking_slot_ids[i] if i < len(self.parking_slot_ids) else f"Slot {i+1}"
+            slot_widget.setText(slot_name)
         
         # Cập nhật thông tin zone
         if self.lbl_parking_zone_title:
@@ -2196,6 +2262,32 @@ class MainWindow(QMainWindow):
     
     # --- END PARKING MAP LOGIC ---
     
+    def save_capture_image(self, qimage, capture_type="entry"):
+        """Lưu ảnh chụp từ camera thành file và trả về đường dẫn"""
+        try:
+            import os
+            from datetime import datetime
+            
+            # Tạo thư mục nếu chưa tồn tại
+            if not os.path.exists("reports/images"):
+                os.makedirs("reports/images", exist_ok=True)
+            
+            # Tạo tên file với timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            filename = f"reports/images/{capture_type}_{timestamp}.jpg"
+            
+            # Chuyển QImage thành file
+            pixmap = QPixmap.fromImage(qimage)
+            if pixmap.save(filename):
+                print(f"[IMAGE-SAVE] ✅ Lưu ảnh thành công: {filename}")
+                return filename
+            else:
+                print(f"[IMAGE-SAVE] ❌ Không thể lưu ảnh: {filename}")
+                return None
+        except Exception as e:
+            print(f"[IMAGE-SAVE] ❌ Lỗi: {e}")
+            return None
+    
     def load_history(self):
         """Load và hiển thị lịch sử giao dịch"""
         print("[HISTORY] load_history() được gọi")
@@ -2211,6 +2303,28 @@ class MainWindow(QMainWindow):
         
         print("[HISTORY] ✅ Widget historyTable tìm thấy")
         
+        # Thiết lập headers ngay từ đầu
+        headers = ["ID", "Mã thẻ", "Biển số", "Loại xe", "Ô đỗ", 
+                   "Giờ vào", "Giờ ra", "Thời gian đỗ", "Loại vé", "Chủ xe",
+                   "Phí", "Thanh toán", "Trạng thái", "Ảnh vào"]
+        table.setColumnCount(len(headers))
+        table.setHorizontalHeaderLabels(headers)
+        
+        # Đảm bảo header được hiển thị
+        table.horizontalHeader().setVisible(True)
+        table.verticalHeader().setVisible(True)
+        
+        # Cài đặt kích thước header để chắc chắn nó hiển thị
+        table.horizontalHeader().setMinimumHeight(30)
+        table.verticalHeader().setDefaultSectionSize(24)
+        
+        # Cài đặt column width cho cột ảnh (cột thứ 13)
+        table.setColumnWidth(13, 110)  # Width 110 để hiển thị thumbnail 100x80
+        
+        print("[HISTORY] ✅ Headers đã được thiết lập")
+        print(f"[HISTORY] Header visible: {table.horizontalHeader().isVisible()}")
+        print(f"[HISTORY] Header height: {table.horizontalHeader().height()}")
+        
         # Lấy thông tin filter
         plate = page.findChild(QLineEdit, "historyPlate")
         date_from = page.findChild(QDateEdit, "historyDateFrom")
@@ -2224,38 +2338,95 @@ class MainWindow(QMainWindow):
         time_from_str = time_from.time().toString("HH:mm:ss") if time_from else "00:00:00"
         time_to_str = time_to.time().toString("HH:mm:ss") if time_to else "23:59:59"
         
-        # Lấy dữ liệu từ database
+        # Lấy dữ liệu từ database (Lấy cả xe đang đỗ và xe đã ra)
         print(f"[HISTORY] Filters: plate='{plate_filter}', date={date_from_str} to {date_to_str}")
         history = self.db.get_parking_history(
             plate=plate_filter if plate_filter else None,
             date_from=date_from_str,
             date_to=date_to_str,
             time_from=time_from_str,
-            time_to=time_to_str
+            time_to=time_to_str,
+            status=None  # Không filter theo status - hiển thị tất cả (PARKING + PAID)
         )
         
+        # Lưu dữ liệu toàn bộ và reset trang
+        self._history_all_data = history
+        self._history_current_page = 0
+        self._history_rows_per_page = 10
+        
+        # Kết nối các nút pagination
+        btn_prev = page.findChild(QPushButton, "btnPrevPage")
+        btn_next = page.findChild(QPushButton, "btnNextPage")
+        
+        if btn_prev:
+            print(f"[HISTORY] ✅ Found btnPrevPage: {btn_prev}")
+            btn_prev.setEnabled(True)  # Ensure button is enabled initially
+            try:
+                btn_prev.clicked.disconnect()
+            except Exception as e:
+                print(f"[HISTORY] Note: {e}")
+                pass
+            btn_prev.clicked.connect(self._history_prev_page)
+            print("[HISTORY] ✅ Connected btnPrevPage")
+        else:
+            print("[HISTORY] ❌ NOT found btnPrevPage")
+            
+        if btn_next:
+            print(f"[HISTORY] ✅ Found btnNextPage: {btn_next}")
+            btn_next.setEnabled(True)  # Ensure button is enabled initially
+            try:
+                btn_next.clicked.disconnect()
+            except Exception as e:
+                print(f"[HISTORY] Note: {e}")
+                pass
+            btn_next.clicked.connect(self._history_next_page)
+            print("[HISTORY] ✅ Connected btnNextPage")
+        else:
+            print("[HISTORY] ❌ NOT found btnNextPage")
+        
+        # Hiển thị trang đầu tiên
+        self._display_history_page()
+        
         print(f"[HISTORY] ✅ Tìm thấy {len(history)} bản ghi")
+    
+    def _display_history_page(self):
+        """Hiển thị trang hiện tại của lịch sử"""
+        page = self.loaded_pages.get("history")
+        if not page:
+            return
         
-        # Định nghĩa headers
-        # Row data: (id, card_id, plate_in, plate_out, time_in, time_out, 
-        #            image_in_path, image_out_path, price, vehicle_type, 
-        #            ticket_type, status, payment_method, slot_id)
-        headers = ["ID", "Mã thẻ", "Biển vào", "Biển ra", "Giờ vào", "Giờ ra", 
-                   "Trạng thái", "Loại xe", "Loại vé", "Phí", "Thanh toán", "Vị trí"]
-        table.setColumnCount(len(headers))
-        table.setHorizontalHeaderLabels(headers)
-        table.setRowCount(len(history))
+        table = page.findChild(QTableWidget, "historyTable")
+        if not table:
+            return
         
-        print(f"[HISTORY] Đang hiển thị {len(history)} dòng vào bảng...")
+        # Kiểm tra dữ liệu
+        if not hasattr(self, '_history_all_data') or not self._history_all_data:
+            table.setRowCount(0)
+            return
         
-        for row_idx, row_data in enumerate(history):
+        # Tính toán vị trí dữ liệu cho trang hiện tại
+        start_idx = self._history_current_page * self._history_rows_per_page
+        end_idx = start_idx + self._history_rows_per_page
+        page_data = self._history_all_data[start_idx:end_idx]
+        
+        # Chỉ cần set số dòng, headers đã được thiết lập trong load_history()
+        table.setRowCount(len(page_data))
+        
+        # Set row height để hiển thị ảnh thumbnail đẹp (80px)
+        for row_idx in range(len(page_data)):
+            table.setRowHeight(row_idx, 90)
+        
+        print(f"[HISTORY-PAGE] Hiển thị trang {self._history_current_page + 1}, dòng {start_idx}-{end_idx}, dữ liệu: {len(page_data)} bản ghi")
+        
+        for row_idx, row_data in enumerate(page_data):
             # row_data indices:
             # 0:id, 1:card_id, 2:plate_in, 3:plate_out, 4:time_in, 5:time_out,
-            # 6:image_in_path, 7:image_out_path, 8:price, 9:vehicle_type,
-            # 10:ticket_type, 11:status, 12:payment_method, 13:slot_id
+            # 6:slot_id, 7:vehicle_type, 8:ticket_type, 9:owner_name, 10:price,
+            # 11:payment_method, 12:status, 13:image_in_path, 14:image_out_path,
+            # 15:duration_hours, 16:duration_minutes
             
             # Tính toán trạng thái hiển thị
-            status = row_data[11]  # status column
+            status = row_data[12]  # status column
             time_out = row_data[5]  # time_out column
             
             if status == "PAID" and time_out:
@@ -2268,34 +2439,138 @@ class MainWindow(QMainWindow):
                 status_display = "⏳ Đang xử lý"
                 status_color = "#f59e0b"  # Orange
             
+            # Tính thời gian đỗ
+            duration_hours = int(row_data[15]) if row_data[15] is not None else 0
+            duration_minutes = int(row_data[16]) if row_data[16] is not None else 0
+            if row_data[5]:  # Chỉ hiển thị nếu có time_out
+                duration_display = f"{duration_hours}h {duration_minutes}m"
+            else:
+                duration_display = "-"
+            
             # Map dữ liệu vào các cột
             display_data = [
-                str(row_data[0]),                    # ID
+                str(row_data[0]),                      # ID
                 str(row_data[1]) if row_data[1] else "-",  # Mã thẻ
-                str(row_data[2]) if row_data[2] else "-",  # Biển vào
-                str(row_data[3]) if row_data[3] else "-",  # Biển ra
+                str(row_data[2]) if row_data[2] else "-",  # Biển số (biển vào)
+                str(row_data[7]) if row_data[7] else "-",  # Loại xe
+                str(row_data[6]) if row_data[6] else "-",  # Ô đỗ (slot_id)
                 str(row_data[4]) if row_data[4] else "-",  # Giờ vào
                 str(row_data[5]) if row_data[5] else "-",  # Giờ ra
-                status_display,                      # Trạng thái (custom)
-                str(row_data[9]) if row_data[9] else "-",  # Loại xe
-                str(row_data[10]) if row_data[10] else "-", # Loại vé
-                f"{int(row_data[8]):,} VND" if row_data[8] else "0 VND",  # Phí
-                str(row_data[12]) if row_data[12] else "-", # Thanh toán
-                str(row_data[13]) if row_data[13] else "-"  # Vị trí
+                duration_display,                      # Thời gian đỗ
+                str(row_data[8]) if row_data[8] else "-",  # Loại vé
+                str(row_data[9]) if row_data[9] else "-",  # Chủ xe (owner_name)
+                f"{int(row_data[10]):,} VND" if row_data[10] else "0 VND",  # Phí
+                str(row_data[11]) if row_data[11] else "-",  # Thanh toán (payment_method)
+                status_display,                        # Trạng thái (custom)
+                row_data[13]  # Ảnh vào (lưu path để xử lý riêng)
             ]
             
             for col_idx, display_val in enumerate(display_data):
-                item = QTableWidgetItem(display_val)
-                
-                # Thêm màu cho cột trạng thái
-                if col_idx == 6:  # Cột trạng thái
-                    item.setForeground(QColor(status_color))
-                
-                table.setItem(row_idx, col_idx, item)
+                # Xử lý cột ảnh (cột 13 - index 13)
+                if col_idx == 13:  # Cột ảnh
+                    if display_val and display_val != "-":
+                        # Tạo ảnh thumbnail
+                        image_path = display_val
+                        if os.path.exists(image_path):
+                            # Load ảnh từ file
+                            pixmap = QPixmap(image_path)
+                            if not pixmap.isNull():
+                                # Scale ảnh thành thumbnail 100x80
+                                thumbnail = pixmap.scaledToHeight(80, Qt.SmoothTransformation)
+                                
+                                # Tạo item với icon
+                                item = QTableWidgetItem()
+                                item.setIcon(thumbnail)
+                                item.setText("")  # Không hiển thị text
+                                item.setData(Qt.UserRole, image_path)  # Lưu path để xem full size sau
+                                item.setToolTip(f"Ảnh: {os.path.basename(image_path)}")
+                                table.setItem(row_idx, col_idx, item)
+                            else:
+                                item = QTableWidgetItem("❌")
+                                table.setItem(row_idx, col_idx, item)
+                        else:
+                            item = QTableWidgetItem("❌")
+                            item.setToolTip(f"File không tìm thấy: {image_path}")
+                            table.setItem(row_idx, col_idx, item)
+                    else:
+                        item = QTableWidgetItem("-")
+                        table.setItem(row_idx, col_idx, item)
+                else:
+                    item = QTableWidgetItem(str(display_val) if display_val else "")
+                    
+                    # Thêm màu cho cột trạng thái
+                    if col_idx == 12:  # Cột trạng thái
+                        item.setForeground(QColor(status_color))
+                    
+                    table.setItem(row_idx, col_idx, item)
         
-        # Resize columns
+        # Cập nhật thông tin pagination
+        self._update_pagination_info()
         table.resizeColumnsToContents()
-        print("[HISTORY] ✅ Hiển thị hoàn tất")
+    
+    def _update_pagination_info(self):
+        """Cập nhật thông tin số trang và kích hoạt/vô hiệu hóa nút"""
+        page = self.loaded_pages.get("history")
+        if not page:
+            return
+        
+        if not hasattr(self, '_history_all_data'):
+            return
+        
+        total_records = len(self._history_all_data)
+        total_pages = (total_records + self._history_rows_per_page - 1) // self._history_rows_per_page
+        
+        # Cập nhật label thông tin trang
+        pagination_label = page.findChild(QLabel, "paginationLabel")
+        if pagination_label:
+            start_idx = self._history_current_page * self._history_rows_per_page + 1
+            end_idx = min((self._history_current_page + 1) * self._history_rows_per_page, total_records)
+            pagination_label.setText(f"Hiển thị {start_idx}-{end_idx} của {total_records} kết quả (Trang {self._history_current_page + 1}/{total_pages})")
+        
+        # Vô hiệu hóa nút prev/next
+        btn_prev = page.findChild(QPushButton, "btnPrevPage")
+        btn_next = page.findChild(QPushButton, "btnNextPage")
+        
+        prev_enabled = self._history_current_page > 0
+        next_enabled = self._history_current_page < total_pages - 1
+        
+        if btn_prev:
+            btn_prev.setEnabled(prev_enabled)
+            print(f"[HISTORY] btnPrevPage enabled: {prev_enabled}")
+        else:
+            print("[HISTORY] ❌ Cannot find btnPrevPage in _update_pagination_info()")
+            
+        if btn_next:
+            btn_next.setEnabled(next_enabled)
+            print(f"[HISTORY] btnNextPage enabled: {next_enabled}")
+        else:
+            print("[HISTORY] ❌ Cannot find btnNextPage in _update_pagination_info()")
+        
+        print(f"[HISTORY] Current: {self._history_current_page + 1}/{total_pages}, Records: {total_records}")
+    
+    def _history_prev_page(self):
+        """Chuyển sang trang trước"""
+        print(f"[HISTORY-BTN] Prev button clicked! Current page: {self._history_current_page}")
+        if self._history_current_page > 0:
+            self._history_current_page -= 1
+            self._display_history_page()
+            print(f"[HISTORY-PAGE] ✅ Chuyển sang trang {self._history_current_page + 1}")
+        else:
+            print(f"[HISTORY-PAGE] ⚠️ Đã ở trang đầu tiên, không thể quay lại")
+    
+    def _history_next_page(self):
+        """Chuyển sang trang sau"""
+        print(f"[HISTORY-BTN] Next button clicked! Current page: {self._history_current_page}")
+        if not hasattr(self, '_history_all_data'):
+            print("[HISTORY-BTN] ❌ No history data")
+            return
+        total_pages = (len(self._history_all_data) + self._history_rows_per_page - 1) // self._history_rows_per_page
+        if self._history_current_page < total_pages - 1:
+            self._history_current_page += 1
+            self._display_history_page()
+            print(f"[HISTORY-PAGE] ✅ Chuyển sang trang {self._history_current_page + 1}")
+        else:
+            print(f"[HISTORY-PAGE] ⚠️ Đã ở trang cuối cùng ({total_pages}), không thể tiếp tục")
     
     def export_history(self):
         """Xuất lịch sử ra file Excel"""
@@ -2306,6 +2581,15 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, "Xuất file", f"Sẽ xuất dữ liệu ra file: {fname}\n(Chức năng đang phát triển)")
             except Exception as e:
                 QMessageBox.critical(self, "Lỗi", f"Không thể xuất file: {e}")
+    def refresh_history_if_visible(self):
+        page = self.loaded_pages.get("history")
+        if not page:
+            return
+
+        if self.stacked_widget.currentWidget() == page:
+            print("[HISTORY] 🔄 Auto refresh history")
+            self.load_history()
+
 
     def closeEvent(self, event):
         """Dọn dẹp khi đóng ứng dụng"""
@@ -2651,7 +2935,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     # Đảm bảo đã chạy file database.py để khởi tạo DB
-    # init_db() # Gọi hàm khởi tạo nếu cần
+    init_db()  # Khởi tạo database nếu cần (sẽ skip nếu đã tồn tại)
+    migrate_db()  # Cập nhật schema nếu có thay đổi
     app = QApplication(sys.argv)
     
     try:

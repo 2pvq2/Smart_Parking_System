@@ -247,7 +247,7 @@ class DBManager:
             }
         return None
 
-    def record_entry(self, card_id, plate_number, vehicle_type, slot_id, ticket_type):
+    def record_entry(self, card_id, plate_number, vehicle_type, slot_id, ticket_type, image_in_path=None):
         """Ghi nhận xe vào bãi"""
         try:
             conn = self.connect()
@@ -270,12 +270,12 @@ class DBManager:
             
             print(f"[DB-ENTRY] ✅ Ghi nhận: {plate_number} ({vehicle_type}) @ {slot_id}")
             
-            # Thêm vào parking_sessions với slot_id
+            # Thêm vào parking_sessions với slot_id và image_in_path
             cursor.execute("""
                 INSERT INTO parking_sessions 
-                (card_id, plate_in, time_in, status, ticket_type, vehicle_type, price, payment_method, slot_id)
-                VALUES (?, ?, datetime('now'), 'PARKING', ?, ?, 0, NULL, ?)
-            """, (card_id, plate_number, ticket_type, vehicle_type, slot_id))
+                (card_id, plate_in, time_in, status, ticket_type, vehicle_type, price, payment_method, slot_id, image_in_path)
+                VALUES (?, ?, datetime('now'), 'PARKING', ?, ?, 0, NULL, ?, ?)
+            """, (card_id, plate_number, ticket_type, vehicle_type, slot_id, image_in_path))
             
             session_id = cursor.lastrowid
             
@@ -314,36 +314,53 @@ class DBManager:
         conn.close()
         return row
 
-    def record_exit(self, session_id, plate_number, fee, payment_method):
+    def record_exit(self, session_id, plate_number, fee, payment_method, image_out_path=None):
         """Ghi nhận xe ra và giải phóng slot"""
         try:
             conn = self.connect()
             cursor = conn.cursor()
             
-            # Lấy slot_id từ session
-            cursor.execute("SELECT slot_id FROM parking_sessions WHERE id=?", (session_id,))
+            # Lấy thông tin session để có slot_id và vehicle_type
+            cursor.execute("""
+                SELECT slot_id, vehicle_type FROM parking_sessions 
+                WHERE id=?
+            """, (session_id,))
             result = cursor.fetchone()
             
             if not result:
                 conn.close()
                 return False
-                
-            slot_id = result[0]
             
-            # Cập nhật session (dùng price thay vì fee)
+            slot_id, vehicle_type = result
+            
+            # Cập nhật session với image_out_path
             cursor.execute("""
                 UPDATE parking_sessions 
-                SET time_out=datetime('now'), status='PAID', price=?, payment_method=?
+                SET time_out=datetime('now'), status='PAID', price=?, payment_method=?, image_out_path=?
                 WHERE id=?
-            """, (fee, payment_method, session_id))
+            """, (fee, payment_method, image_out_path, session_id))
             
-            # Giải phóng slot nếu tìm thấy
+            # Giải phóng slot
             if slot_id:
+                # Nếu có slot_id, dùng nó trực tiếp
                 cursor.execute("UPDATE parking_slots SET status=0 WHERE slot_id=?", (slot_id,))
-                print(f"[DB-EXIT] Session #{session_id} closed, Slot {slot_id} freed")
+                print(f"[DB-EXIT] Session #{session_id} closed, slot {slot_id} freed")
             else:
-                print(f"[DB-EXIT] Session #{session_id} closed, no slot to free")
+                # Nếu slot_id NULL (migration data), tìm slot đang occupied cho vehicle_type này
+                cursor.execute("""
+                    SELECT slot_id FROM parking_slots 
+                    WHERE vehicle_type=? AND status=1 
+                    LIMIT 1
+                """, (vehicle_type,))
+                found_slot = cursor.fetchone()
+                if found_slot:
+                    slot_to_free = found_slot[0]
+                    cursor.execute("UPDATE parking_slots SET status=0 WHERE slot_id=?", (slot_to_free,))
+                    print(f"[DB-EXIT] Session #{session_id} closed (legacy), slot {slot_to_free} freed")
+                else:
+                    print(f"[DB-EXIT] Session #{session_id} closed (legacy), but couldn't find occupied slot to free")
             
+            conn.commit()
             conn.close()
             return True
             
@@ -352,6 +369,34 @@ class DBManager:
             return False
 
     # --- 5. THỐNG KÊ DASHBOARD ---
+    def get_available_slots_for_guests(self, vehicle_type):
+        """Tính số chỗ trống dành cho khách vãng lai (bỏ qua reserved slots)"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        
+        # Tổng slot non-reserved (dành cho guests)
+        cursor.execute("""
+            SELECT COUNT(*) FROM parking_slots 
+            WHERE vehicle_type=? AND is_reserved=0
+        """, (vehicle_type,))
+        total_guest_slots = cursor.fetchone()[0]
+        
+        # Số GUEST vehicles đang parking (chỉ đếm xe đang đỗ ở guest slots)
+        # = Tổng vehicles - vehicles ở monthly slots
+        # Nhưng vì không biết vehicle nào ở monthly slot nên dùng cách khác:
+        # Đếm số occupied GUEST slots trực tiếp
+        cursor.execute("""
+            SELECT COUNT(*) FROM parking_slots 
+            WHERE vehicle_type=? AND is_reserved=0 AND status=1
+        """, (vehicle_type,))
+        guest_slots_occupied = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        # Available = non-reserved slots - occupied non-reserved slots
+        available = max(0, total_guest_slots - guest_slots_occupied)
+        return available, total_guest_slots
+    
     def get_parking_statistics(self):
         """Lấy các thống kê cho dashboard"""
         conn = self.connect()
@@ -425,13 +470,6 @@ class DBManager:
         total_out_today = cursor.fetchone()[0]
         # print(f"[STATS-DEBUG] Tổng xe ra hôm nay: {total_out_today}")
         
-        # Số chỗ trống ô tô
-        cursor.execute("""
-            SELECT COUNT(*) FROM parking_slots 
-            WHERE vehicle_type='Ô tô' AND status=0
-        """)
-        car_available = cursor.fetchone()[0]
-        
         # Tổng số chỗ ô tô
         cursor.execute("""
             SELECT COUNT(*) FROM parking_slots 
@@ -439,12 +477,19 @@ class DBManager:
         """)
         car_total = cursor.fetchone()[0]
         
-        # Số chỗ trống xe máy
+        # Tổng số chỗ GUEST ô tô (không reserved)
         cursor.execute("""
             SELECT COUNT(*) FROM parking_slots 
-            WHERE vehicle_type='Xe máy' AND status=0
+            WHERE vehicle_type='Ô tô' AND is_reserved=0
         """)
-        motor_available = cursor.fetchone()[0]
+        car_guest_total = cursor.fetchone()[0]
+        
+        # Tổng số chỗ MONTHLY ô tô (reserved)
+        cursor.execute("""
+            SELECT COUNT(*) FROM parking_slots 
+            WHERE vehicle_type='Ô tô' AND is_reserved=1
+        """)
+        car_monthly_total = cursor.fetchone()[0]
         
         # Tổng số chỗ xe máy
         cursor.execute("""
@@ -452,6 +497,54 @@ class DBManager:
             WHERE vehicle_type='Xe máy'
         """)
         motor_total = cursor.fetchone()[0]
+        
+        # Tổng số chỗ GUEST xe máy (không reserved)
+        cursor.execute("""
+            SELECT COUNT(*) FROM parking_slots 
+            WHERE vehicle_type='Xe máy' AND is_reserved=0
+        """)
+        motor_guest_total = cursor.fetchone()[0]
+        
+        # Tổng số chỗ MONTHLY xe máy (reserved)
+        cursor.execute("""
+            SELECT COUNT(*) FROM parking_slots 
+            WHERE vehicle_type='Xe máy' AND is_reserved=1
+        """)
+        motor_monthly_total = cursor.fetchone()[0]
+        
+        # Đếm số occupied MONTHLY slots (vehicles với assigned_slot ở MONTHLY slots)
+        cursor.execute("""
+            SELECT COUNT(DISTINCT ps.id) FROM parking_sessions ps
+            INNER JOIN parking_slots slot ON ps.slot_id = slot.slot_id
+            WHERE ps.status='PARKING' AND ps.vehicle_type='Ô tó' AND slot.is_reserved=1
+        """)
+        car_monthly_occupied = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(DISTINCT ps.id) FROM parking_sessions ps
+            INNER JOIN parking_slots slot ON ps.slot_id = slot.slot_id
+            WHERE ps.status='PARKING' AND ps.vehicle_type='Xe máy' AND slot.is_reserved=1
+        """)
+        motor_monthly_occupied = cursor.fetchone()[0]
+        
+        # Tính số occupied GUEST = tổng parked - occupied MONTHLY
+        car_guest_occupied = max(0, car_parking - car_monthly_occupied)
+        motor_guest_occupied = max(0, motor_parking - motor_monthly_occupied)
+        
+        # Tính số chỗ trống GUEST = GUEST slots - occupied GUEST slots
+        car_guest_available = max(0, car_guest_total - car_guest_occupied)
+        motor_guest_available = max(0, motor_guest_total - motor_guest_occupied)
+        
+        # Tính số chỗ trống MONTHLY = MONTHLY slots - occupied MONTHLY slots
+        car_monthly_available = max(0, car_monthly_total - car_monthly_occupied)
+        motor_monthly_available = max(0, motor_monthly_total - motor_monthly_occupied)
+        
+        # Global available = tất cả slots - vehicles parking (cho thống kê tổng quát)
+        car_available = car_total - car_parking
+        motor_available = motor_total - motor_parking
+        
+        print(f"[STATS] Car: {car_parking} parking | GUEST: {car_guest_available}/{car_guest_total} | MONTHLY: {car_monthly_available}/{car_monthly_total}")
+        print(f"[STATS] Motor: {motor_parking} parking | GUEST: {motor_guest_available}/{motor_guest_total} | MONTHLY: {motor_monthly_available}/{motor_monthly_total}")
         
         conn.close()
         
@@ -462,8 +555,16 @@ class DBManager:
             'total_out_today': total_out_today,
             'car_available': car_available,
             'car_total': car_total,
+            'car_guest_available': car_guest_available,
+            'car_guest_total': car_guest_total,
+            'car_monthly_available': car_monthly_available,
+            'car_monthly_total': car_monthly_total,
             'motor_available': motor_available,
-            'motor_total': motor_total
+            'motor_total': motor_total,
+            'motor_guest_available': motor_guest_available,
+            'motor_guest_total': motor_guest_total,
+            'motor_monthly_available': motor_monthly_available,
+            'motor_monthly_total': motor_monthly_total,
         }
     
     # --- 7. LỊCH SỬ GIAO DỊCH ---
@@ -481,25 +582,31 @@ class DBManager:
             
         Returns:
             List of tuples: (id, card_id, plate_in, plate_out, time_in, time_out, 
-                           image_in_path, image_out_path, price, vehicle_type, 
-                           ticket_type, status, payment_method, slot_id)
+                           slot_id, vehicle_type, ticket_type, owner_name, price, 
+                           payment_method, status, image_in_path, image_out_path, 
+                           duration_hours, duration_minutes)
         """
         conn = self.connect()
         cursor = conn.cursor()
         
-        # Select các cột cần thiết theo đúng thứ tự
+        # Select các cột cần thiết theo đúng thứ tự, JOIN với monthly_tickets để lấy owner_name
         query = """
-            SELECT id, card_id, plate_in, plate_out, time_in, time_out, 
-                   image_in_path, image_out_path, price, vehicle_type, 
-                   ticket_type, status, payment_method, slot_id
-            FROM parking_sessions 
+            SELECT ps.id, ps.card_id, ps.plate_in, ps.plate_out, ps.time_in, ps.time_out, 
+                   ps.slot_id, ps.vehicle_type, ps.ticket_type, 
+                   COALESCE(mt.owner_name, '') as owner_name,
+                   ps.price, ps.payment_method, ps.status, 
+                   ps.image_in_path, ps.image_out_path,
+                   CASE WHEN ps.time_out IS NOT NULL THEN CAST((julianday(ps.time_out) - julianday(ps.time_in)) * 24 AS INTEGER) ELSE 0 END as duration_hours,
+                   CASE WHEN ps.time_out IS NOT NULL THEN CAST(((julianday(ps.time_out) - julianday(ps.time_in)) * 24 * 60) % 60 AS INTEGER) ELSE 0 END as duration_minutes
+            FROM parking_sessions ps
+            LEFT JOIN monthly_tickets mt ON ps.card_id = mt.card_id
             WHERE 1=1
         """
         params = []
         
         # Tìm kiếm theo biển số (plate_in hoặc plate_out)
         if plate and plate.strip():
-            query += " AND (plate_in LIKE ? OR plate_out LIKE ?)"
+            query += " AND (ps.plate_in LIKE ? OR ps.plate_out LIKE ?)"
             search_pattern = f"%{plate.strip()}%"
             params.append(search_pattern)
             params.append(search_pattern)
@@ -507,26 +614,29 @@ class DBManager:
         # Filter theo ngày vào
         if date_from:
             if time_from:
-                query += " AND datetime(time_in) >= datetime(?)"
+                query += " AND datetime(ps.time_in) >= datetime(?)"
                 params.append(f"{date_from} {time_from}")
             else:
-                query += " AND date(time_in) >= date(?)"
+                query += " AND date(ps.time_in) >= date(?)"
                 params.append(date_from)
         
         if date_to:
             if time_to:
-                query += " AND datetime(time_in) <= datetime(?)"
+                query += " AND datetime(ps.time_in) <= datetime(?)"
                 params.append(f"{date_to} {time_to}")
             else:
-                query += " AND date(time_in) <= date(?)"
+                query += " AND date(ps.time_in) <= date(?)"
                 params.append(date_to)
         
         # Filter theo trạng thái
         if status:
-            query += " AND status = ?"
+            query += " AND ps.status = ?"
             params.append(status)
+            print(f"[DB-HISTORY] Filtering by status: {status}")
+        else:
+            print(f"[DB-HISTORY] Showing all statuses (PARKING + PAID)")
         
-        query += " ORDER BY id DESC LIMIT 1000"
+        query += " ORDER BY ps.id DESC LIMIT 1000"
         
         print(f"[DB-HISTORY] Query: {query}")
         print(f"[DB-HISTORY] Params: {params}")

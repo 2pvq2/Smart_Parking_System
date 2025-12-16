@@ -109,7 +109,50 @@
           </item>
           <item>
            <widget class="QTableWidget" name="historyTable">
-            <property name="columnCount"><number>10</number></property>
+            <property name="columnCount"><number>14</number></property>
+            <property name="rowCount"><number>10</number></property>
+            <column>
+             <property name="text"><string>ID</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Mã thẻ</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Biển số</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Loại xe</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Ô đỗ</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Giờ vào</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Giờ ra</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Thời gian đỗ</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Loại vé</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Chủ xe</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Phí</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Thanh toán</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Trạng thái</string></property>
+            </column>
+            <column>
+             <property name="text"><string>Ảnh vào</string></property>
+            </column>
            </widget>
           </item>
           <item>

@@ -65,14 +65,20 @@ def check_database():
     if not db_path.exists():
         print(f"   ⚠️ Database chưa tồn tại, đang tạo mới...")
         try:
-            from database import init_db
+            from database import init_db, migrate_db
             init_db()
+            migrate_db()
             print(f"   ✅ Đã tạo database: {db_path}")
         except Exception as e:
             print(f"   ❌ Lỗi tạo database: {e}")
             return False
     else:
         print(f"   ✅ Database OK: {db_path}")
+        try:
+            from database import migrate_db
+            migrate_db()  # Cập nhật schema nếu cần
+        except Exception as e:
+            print(f"   ⚠️ Lỗi cập nhật schema: {e}")
     
     return True
 

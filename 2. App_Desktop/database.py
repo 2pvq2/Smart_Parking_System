@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import sqlite3
 import hashlib
 import os
@@ -93,7 +95,8 @@ def init_db():
         vehicle_type TEXT,     -- 'Ô tô' hoặc 'Xe máy'
         ticket_type TEXT,      -- 'MONTHLY' (Vé tháng) hoặc 'GUEST' (Vãng lai)
         status TEXT DEFAULT 'PARKING', -- 'PARKING' (Đang gửi) hoặc 'COMPLETED' (Đã ra)
-        payment_method TEXT    -- 'CASH' (Tiền mặt) hoặc 'BANKING' (Chuyển khoản)
+        payment_method TEXT,   -- 'CASH' (Tiền mặt) hoặc 'BANKING' (Chuyển khoản)
+        slot_id TEXT           -- Ô đỗ được gán cho xe này
     )
     ''')
     
@@ -157,5 +160,35 @@ def init_db():
     else:
         print("❌ Lỗi: Không tạo được file database.")
 
+def migrate_db():
+    """Cập nhật schema của database hiện có"""
+    print(f"--- Đang kiểm tra và cập nhật Database: {DB_NAME} ---")
+    if not os.path.exists(DB_NAME):
+        print("❌ Database không tồn tại, hãy chạy init_db() trước")
+        return
+    
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        # Kiểm tra nếu cột slot_id chưa tồn tại trong parking_sessions
+        cursor.execute("PRAGMA table_info(parking_sessions)")
+        columns = [row[1] for row in cursor.fetchall()]
+        
+        if 'slot_id' not in columns:
+            print("⚠️  Cột slot_id chưa tồn tại, đang thêm...")
+            cursor.execute("ALTER TABLE parking_sessions ADD COLUMN slot_id TEXT")
+            print("✔ Đã thêm cột slot_id")
+        else:
+            print("✔ Cột slot_id đã tồn tại")
+        
+        conn.commit()
+        conn.close()
+        print("✔ Cập nhật Database hoàn tất")
+        
+    except Exception as e:
+        print(f"❌ Lỗi cập nhật Database: {e}")
+
 if __name__ == "__main__":
     init_db()
+    migrate_db()

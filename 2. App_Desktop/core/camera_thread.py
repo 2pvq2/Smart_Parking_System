@@ -21,18 +21,34 @@ except ImportError:
 # --- Điều chỉnh sys.path để truy cập 1. AI_Module ---
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 AI_MODULE_PATH = os.path.abspath(os.path.join(CURRENT_DIR, '..', '..', '1. AI_Module'))
+print(f"[CAMERA] CURRENT_DIR: {CURRENT_DIR}")
+print(f"[CAMERA] AI_MODULE_PATH: {AI_MODULE_PATH}")
+print(f"[CAMERA] AI_MODULE_PATH exists: {os.path.exists(AI_MODULE_PATH)}")
+
 if AI_MODULE_PATH not in sys.path:
     sys.path.append(AI_MODULE_PATH)
+    print(f"[CAMERA] Added AI_MODULE_PATH to sys.path")
+
+# List files in AI_MODULE_PATH
+if os.path.exists(AI_MODULE_PATH):
+    ai_files = os.listdir(AI_MODULE_PATH)
+    print(f"[CAMERA] Files in AI_MODULE_PATH: {ai_files}")
 
 try:
     from LPR_Processor_PaddleOCR import LPR_Processor 
-except ImportError:
+    print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor_PaddleOCR")
+except ImportError as e:
+    print(f"[CAMERA] ❌ Cannot import from LPR_Processor_PaddleOCR: {e}")
     try:
         from LPR_Processor_v2 import LPR_Processor
-    except ImportError:
+        print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor_v2")
+    except ImportError as e:
+        print(f"[CAMERA] ❌ Cannot import from LPR_Processor_v2: {e}")
         try:
             from LPR_Processor import LPR_Processor
-        except ImportError:
+            print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor")
+        except ImportError as e:
+            print(f"[CAMERA] ❌ Cannot import from LPR_Processor: {e}")
             print("FATAL ERROR: Khong the tim thay LPR_Processor.py trong 1. AI_Module/")
             class LPR_Processor:
                 def __init__(self): pass

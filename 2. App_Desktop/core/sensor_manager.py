@@ -13,7 +13,7 @@ class SensorDataManager(QObject):
     # ⚙️ CẤU HÌNH CÓ THỂ THAY ĐỔI
     MOTOR_SLOTS = 5  # Số slot xe máy
     CAR_SLOTS = 5    # Số slot ô tô
-    SENSOR_TIMEOUT = 60  # Timeout 60 giây - nếu không có update sẽ reset sensor data
+    SENSOR_TIMEOUT = 300  # Timeout 5 phút (300s) - nếu không có update sẽ reset sensor data
     
     # Signal thông báo khi có thay đổi số chỗ trống
     slots_changed = Signal(dict)  # {motor_occupied, motor_available, car_occupied, car_available}
@@ -174,18 +174,18 @@ class SensorDataManager(QObject):
     def check_sensor_timeout(self):
         """
         Kiểm tra timeout của cảm biến
-        Nếu quá SENSOR_TIMEOUT giây không có update, reset sensor data về mặc định
-        Điều này tránh tình trạng UI hiển thị dữ liệu sensor cũ sau khi che cảm biến
+        Nếu quá SENSOR_TIMEOUT giây không có update, return True (dữ liệu cũ)
+        KHÔNG reset sensor data - vẫn giữ lại dữ liệu cảm biến cuối cùng
+        Việc reset sẽ làm mất thông tin khi sensor chỉ gửi theo changes, không gửi định kỳ
         """
         if not self.sensor_data['last_update']:
             return False
             
         time_diff = time.time() - self.sensor_data['last_update']
         
-        # Nếu timeout quá lâu, reset sensor data
+        # Return True nếu dữ liệu quá cũ (> SENSOR_TIMEOUT)
+        # Nhưng KHÔNG reset sensor data - giữ lại cho UI
         if time_diff > self.SENSOR_TIMEOUT:
-            print(f"[SENSOR-TIMEOUT] ⚠️ Không có dữ liệu sensor trong {time_diff:.1f}s, reset dữ liệu")
-            self._reset_sensor_data()
             return True
             
         return False
@@ -205,8 +205,11 @@ class SensorDataManager(QObject):
     @property
     def current_binary_status(self):
         """Property để dễ dàng truy cập binary status hiện tại"""
-        # Kiểm tra timeout trước khi trả về binary
-        self.check_sensor_timeout()
+        # Chỉ check timeout nhưng KHÔNG reset dữ liệu
+        # Vẫn trả về binary status cuối cùng được nhận từ sensor
+        if self.check_sensor_timeout():
+            # Dữ liệu cũ nhưng vẫn giữ lại
+            pass
         return self.sensor_data['status_binary']
     
     def get_status_display(self):

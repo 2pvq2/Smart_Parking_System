@@ -184,7 +184,7 @@
       <!-- Row 1 -->
       <item row="0" column="0">
        <widget class="QPushButton" name="slot_1">
-        <property name="text"><string>Slot 1</string></property>
+        <property name="text"><string>M1(MONTHLY)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -193,7 +193,7 @@
       </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="slot_2">
-        <property name="text"><string>Slot 2</string></property>
+        <property name="text"><string>M2(MONTHLY)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -202,7 +202,7 @@
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="slot_3">
-        <property name="text"><string>Slot 3</string></property>
+        <property name="text"><string>M3(GUEST)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -211,7 +211,7 @@
       </item>
       <item row="0" column="3">
        <widget class="QPushButton" name="slot_4">
-        <property name="text"><string>Slot 4</string></property>
+        <property name="text"><string>M4(GUEST)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -220,7 +220,7 @@
       </item>
       <item row="0" column="4">
        <widget class="QPushButton" name="slot_5">
-        <property name="text"><string>Slot 5</string></property>
+        <property name="text"><string>M5(GUEST)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -231,7 +231,7 @@
       <!-- Row 2 -->
       <item row="1" column="0">
        <widget class="QPushButton" name="slot_6">
-        <property name="text"><string>Slot 6</string></property>
+        <property name="text"><string>A1(MONTHLY)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -240,7 +240,7 @@
       </item>
       <item row="1" column="1">
        <widget class="QPushButton" name="slot_7">
-        <property name="text"><string>Slot 7</string></property>
+        <property name="text"><string>A2(MONTHLY)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -249,7 +249,7 @@
       </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="slot_8">
-        <property name="text"><string>Slot 8</string></property>
+        <property name="text"><string>A3(GUEST)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -258,7 +258,7 @@
       </item>
       <item row="1" column="3">
        <widget class="QPushButton" name="slot_9">
-        <property name="text"><string>Slot 9</string></property>
+        <property name="text"><string>A4(GUEST)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
@@ -267,7 +267,7 @@
       </item>
       <item row="1" column="4">
        <widget class="QPushButton" name="slot_10">
-        <property name="text"><string>Slot 10</string></property>
+        <property name="text"><string>A5(GUEST)</string></property>
         <property name="minimumSize"><size><width>140</width><height>100</height></size></property>
         <property name="styleSheet">
          <string>QPushButton { background-color: #22c55e; color: white; font-size: 14pt; font-weight: 600; border-radius: 8px; }</string>
