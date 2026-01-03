@@ -2,6 +2,16 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "3. IoT_Firmware"
+		},
+		{
+			"name": "Parking_Node2",
+			"path": "4.Node2_Sensors/Parking_Node2"
+		},
+		{
+			"path": "4.Node2_Sensors"
 		}
 	],
 	"settings": {

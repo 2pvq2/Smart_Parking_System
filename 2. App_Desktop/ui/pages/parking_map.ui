@@ -49,16 +49,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnTestColor">
-        <property name="text">
-         <string>🧪 Test màu</string>
-        </property>
-        <property name="styleSheet">
-         <string>padding: 5px 15px; background-color: #f97316; color: white; border-radius: 5px; font-weight:600;</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

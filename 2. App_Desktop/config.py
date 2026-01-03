@@ -1,24 +1,31 @@
-import os
+"""
+CONFIG.PY - Import từ setup.py (Unified Configuration)
+Giữ backwards compatibility với các file cũ
+"""
 
-# Đường dẫn cơ sở
+# Import từ setup.py
+from setup import (
+    DATABASE_PATH,
+    CAMERA_ENTRY_ID,
+    CAMERA_EXIT_ID,
+    ENABLE_AI_DETECTION,
+    AI_SKIP_FRAMES,
+    AI_MIN_CONFIDENCE,
+    UI_PATH,
+    PAGES_PATH,
+    SERVER_CONFIG,
+    ESP32_CONFIG,
+    CAMERA_CONFIG,
+    AI_CONFIG,
+    PROTOCOL,
+)
+
+# Legacy names (giữ compatibility)
+import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = "parking_system.db"
-DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+DB_PATH = DATABASE_PATH
 
-# Cấu hình Camera (0, 1 là webcam USB. Hoặc điền link RTSP nếu dùng cam IP)
-# Đặt None để tắt camera nếu không có thiết bị
-CAMERA_ENTRY_ID = 0  # Camera chính (thường là 0)
-CAMERA_EXIT_ID = 1  # Tắt camera thứ 2 nếu không có
-
-# Cấu hình AI LPR
-ENABLE_AI_DETECTION = True  # Bật/tắt AI nhận diện biển số
-AI_SKIP_FRAMES = 5  # Xử lý AI mỗi N frames (tăng để giảm lag)
-AI_MIN_CONFIDENCE = 2  # Số lần phát hiện tối thiểu để xác nhận biển số
-
-# Cấu hình UI
-UI_PATH = os.path.join(BASE_DIR, "ui")
-PAGES_PATH = os.path.join(UI_PATH, "pages")
-
-# Cấu hình ESP32 (Sẽ dùng sau)
+# Cấu hình ESP32 legacy
 ESP32_PORT = "COM3"
 BAUD_RATE = 115200

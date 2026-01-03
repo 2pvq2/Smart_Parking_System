@@ -34,26 +34,9 @@ if os.path.exists(AI_MODULE_PATH):
     ai_files = os.listdir(AI_MODULE_PATH)
     print(f"[CAMERA] Files in AI_MODULE_PATH: {ai_files}")
 
-try:
-    from LPR_Processor_PaddleOCR import LPR_Processor 
-    print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor_PaddleOCR")
-except ImportError as e:
-    print(f"[CAMERA] ❌ Cannot import from LPR_Processor_PaddleOCR: {e}")
-    try:
-        from LPR_Processor_v2 import LPR_Processor
-        print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor_v2")
-    except ImportError as e:
-        print(f"[CAMERA] ❌ Cannot import from LPR_Processor_v2: {e}")
-        try:
-            from LPR_Processor import LPR_Processor
-            print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor")
-        except ImportError as e:
-            print(f"[CAMERA] ❌ Cannot import from LPR_Processor: {e}")
-            print("FATAL ERROR: Khong the tim thay LPR_Processor.py trong 1. AI_Module/")
-            class LPR_Processor:
-                def __init__(self): pass
-                def recognize(self, frame): return frame, "LỖI LPR MODULE"
-# ----------------------------------------------------
+# ⚡ BỎ IMPORT GLOBAL - Chuyển sang LAZY LOAD trong method
+# (Tránh tải LPR ngay khi import file)
+LPR_Processor = None  # Sẽ được load lần đầu khi cần
 
 
 class CameraThread(QThread):
@@ -75,14 +58,53 @@ class CameraThread(QThread):
         self.cap = None
         self.current_frame = None
         
-        # Khởi tạo AI system
-        print(f"[CAMERA {camera_id}] Đang khởi tạo AI system...")
-        self.lpr_system = LPR_Processor()
-        print(f"[CAMERA {camera_id}] AI system đã sẵn sàng!")
+        # ⚡ LAZY LOAD AI - chỉ tải khi thực sự cần (không tải khi startup)
+        self.lpr_system = None
+        self.lpr_loaded = False
+        print(f"[CAMERA {camera_id}] AI sẽ được tải khi cần (lazy load)...")
 
         if STATIC_IMAGE_DEBUG and not os.path.exists(STATIC_IMAGE_PATH):
             print(f"LỖI DEBUG: Khong tim thay file anh tĩnh tại {STATIC_IMAGE_PATH}. Chay lai chế độ Camera.")
             STATIC_IMAGE_DEBUG = False
+    
+    def _ensure_lpr_loaded(self):
+        """⚡ Đảm bảo LPR đã được tải (lazy load - chỉ lần đầu)"""
+        global LPR_Processor
+        
+        if not self.lpr_loaded and self.enable_ai:
+            print(f"[CAMERA {self.camera_id}] ⚡ Đang tải AI system ngay bây giờ...")
+            try:
+                # ⚡ LAZY IMPORT - Chỉ tải khi thực sự cần
+                if LPR_Processor is None:
+                    try:
+                        from LPR_Processor_PaddleOCR import LPR_Processor as LPR
+                        LPR_Processor = LPR
+                        print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor_PaddleOCR")
+                    except ImportError:
+                        try:
+                            from LPR_Processor_v2 import LPR_Processor as LPR
+                            LPR_Processor = LPR
+                            print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor_v2")
+                        except ImportError:
+                            try:
+                                from LPR_Processor import LPR_Processor as LPR
+                                LPR_Processor = LPR
+                                print("[CAMERA] ✅ Loaded LPR_Processor from LPR_Processor")
+                            except ImportError as e:
+                                print(f"[CAMERA] ❌ Cannot import LPR_Processor: {e}")
+                                class DummyLPR:
+                                    def __init__(self): pass
+                                    def recognize(self, frame): return frame, "LỖI LPR MODULE"
+                                    def recognize_from_file(self, path): return None, "LỖI LPR MODULE"
+                                LPR_Processor = DummyLPR
+                
+                # Khởi tạo LPR system
+                self.lpr_system = LPR_Processor()
+                self.lpr_loaded = True
+                print(f"[CAMERA {self.camera_id}] ✅ AI system tải xong!")
+            except Exception as e:
+                print(f"[CAMERA {self.camera_id}] ❌ Lỗi tải AI: {e}")
+                self.lpr_loaded = False
 
     def _convert_cv_qt(self, cv_img):
         """Chuyển đổi ảnh OpenCV sang QImage để hiển thị"""
@@ -96,6 +118,11 @@ class CameraThread(QThread):
     def run(self):
         if STATIC_IMAGE_DEBUG:
             # --- CHẾ ĐỘ DEBUG ẢNH TĨNH ---
+            self._ensure_lpr_loaded()  # ⚡ Tải AI trước khi dùng
+            if not self.lpr_system:
+                print("[CAMERA] LPR không khả dụng")
+                return
+            
             processed_img, recognized_plate = self.lpr_system.recognize_from_file(STATIC_IMAGE_PATH)
             
             if recognized_plate.startswith("LỖI"):
@@ -138,6 +165,14 @@ class CameraThread(QThread):
                         print(f"[CAMERA {self.camera_id}] 📸 Đang chụp và nhận diện...")
                         
                         try:
+                            # ⚡ Tải AI khi cần (lazy load)
+                            self._ensure_lpr_loaded()
+                            
+                            if not self.lpr_system:
+                                print(f"[CAMERA {self.camera_id}] ❌ LPR không khả dụng")
+                                self.lpr_result_signal.emit("LỖI: LPR Module")
+                                continue
+                            
                             # Chụp ảnh và nhận diện bằng AI
                             processed_img, license_plate = self.lpr_system.recognize(self.current_frame)
                             
@@ -156,7 +191,7 @@ class CameraThread(QThread):
                     
                     # Hiển thị live preview (không xử lý AI)
                     display_frame = self.current_frame.copy()
-                    status_text = f"CAM {self.camera_id} | Sẵn sàng - Quét thẻ để chụp"
+                    status_text = f"CAM {self.camera_id} "
                     cv2.putText(display_frame, status_text, (10, 25), 
                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
                     

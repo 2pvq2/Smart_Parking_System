@@ -26,6 +26,7 @@ class NetworkServer(QObject):
     
     # Signals để gửi dữ liệu về main thread
     card_scanned = Signal(str, int)  # (card_uid, lane_number)
+    barrier_closed = Signal(int)     # (lane_number) - khi barie đóng
     esp_connected = Signal(str)      # (client_ip)
     esp_disconnected = Signal()
     sensor_data_received = Signal(int, str, int, int)  # (zone_id, status_binary, occupied, available)
@@ -76,17 +77,18 @@ class NetworkServer(QObject):
         try:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # Bind explicitly to IPv4 localhost and external
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)  # Cho phép tối đa 5 connections
-            self.server_socket.settimeout(1.0)  # Timeout để check running flag
+            self.server_socket.settimeout(0.5)  # Timeout ngắn hơn để check running flag
             
             print(f"[NET] ✅ Server sẵn sàng nhận kết nối từ ESP32")
+            print(f"[NET] 📍 Binding: {self.host}:{self.port}")
             
             while self.running:
                 try:
                     # Chấp nhận kết nối từ ESP32
                     client, address = self.server_socket.accept()
-                    
                     print(f"[NET] 🔗 ESP32 đã kết nối từ {address}")
                     
                     # Lưu client vào dictionary
@@ -206,6 +208,8 @@ class NetworkServer(QObject):
             try:
                 lane = int(parts[1])
                 print(f"[NET] 🚧 Barie làn {lane} đã đóng")
+                # Emit signal
+                self.barrier_closed.emit(lane)
             except ValueError:
                 pass
         

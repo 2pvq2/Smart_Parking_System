@@ -21,7 +21,7 @@ const char* WIFI_PASS = "11022003";
 //   - Mac/Linux: Mở terminal → gõ "ifconfig" hoặc "ip addr"
 // 
 // QUAN TRỌNG: PHẢI GIỐNG ESP32 CHÍNH!
-const char* SERVER_IP = "192.168.1.8";  // ← IP giống ESP32 chính
+const char* SERVER_IP = "192.168.1.4";  // ← IP giống ESP32 chính
 
 // Port của server (PHẢI LÀ 8888 - CÙNG PORT VỚI ESP32 CHÍNH)
 // Desktop App chỉ listen 1 port: 8888

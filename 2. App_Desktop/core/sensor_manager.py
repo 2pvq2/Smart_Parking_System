@@ -5,6 +5,12 @@ Nhận data từ ESP32 Node2 và đồng bộ với database
 
 from PySide6.QtCore import QObject, Signal
 import time
+import sys
+import io
+
+# Fix Unicode encoding for Windows console
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
 class SensorDataManager(QObject):
@@ -99,7 +105,7 @@ class SensorDataManager(QObject):
         # Fallback: lấy từ database
         return self._get_db_available_count()
     
-    def get_smart_available_count(self, db_motor_count, db_car_count):
+    def get_smart_available_count(self, db_motor_count, db_car_count, motor_guest_total=None, car_guest_total=None):
         """
         Tính số chỗ trống thông minh cho TỪNG LOẠI XE (xe máy & ô tô)
         
@@ -109,17 +115,25 @@ class SensorDataManager(QObject):
         
         Logic:
         - Đếm occupied slots từ cảm biến cho mỗi loại
-        - Tính smart available = min(sensor_available, db_available) cho từng loại
-        - Tối ưu: không oversell
+        - Tính smart available = min(sensor_available, db_available_GUEST) cho từng loại
+        - Tối ưu: không oversell, chỉ tính GUEST slots
         
         Args:
-            db_motor_count: Số xe máy đang parking trong DB
-            db_car_count: Số ô tô đang parking trong DB
+            db_motor_count: Số xe máy GUEST đang parking trong DB
+            db_car_count: Số ô tô GUEST đang parking trong DB
+            motor_guest_total: Tổng số ô XE MÁY dành cho GUEST (nếu None sẽ dùng mặc định 5)
+            car_guest_total: Tổng số ô Ô TÔ dành cho GUEST (nếu None sẽ dùng mặc định 5)
             
         Returns:
             dict: {motor_available, car_available}
         """
-        result = {'motor_available': 5, 'car_available': 5}
+        # Default: nếu không truyền vào thì dùng toàn bộ 5 slots (tương thích cũ)
+        if motor_guest_total is None:
+            motor_guest_total = 5
+        if car_guest_total is None:
+            car_guest_total = 5
+            
+        result = {'motor_available': motor_guest_total, 'car_available': car_guest_total}
         
         # Nếu có dữ liệu cảm biến fresh
         if self.sensor_data['last_update']:
@@ -135,11 +149,11 @@ class SensorDataManager(QObject):
                 sensor_motor_available = self.MOTOR_SLOTS - motor_occupied
                 sensor_car_available = self.CAR_SLOTS - car_occupied
                 
-                # Tính DB available
-                db_motor_available = self.MOTOR_SLOTS - db_motor_count
-                db_car_available = self.CAR_SLOTS - db_car_count
+                # ✅ Tính DB available (CHỈ GUEST SLOTS)
+                db_motor_available = motor_guest_total - db_motor_count
+                db_car_available = car_guest_total - db_car_count
                 
-                # Lấy min (an toàn)
+                # Lấy min (an toàn) - không bao giờ oversell GUEST slots
                 result['motor_available'] = min(sensor_motor_available, db_motor_available)
                 result['car_available'] = min(sensor_car_available, db_car_available)
                 
@@ -150,9 +164,9 @@ class SensorDataManager(QObject):
                 
                 return result
         
-        # Fallback: dùng DB khi không có sensor
-        result['motor_available'] = max(0, 5 - db_motor_count)
-        result['car_available'] = max(0, 5 - db_car_count)
+        # Fallback: dùng DB khi không có sensor (chỉ GUEST slots)
+        result['motor_available'] = max(0, motor_guest_total - db_motor_count)
+        result['car_available'] = max(0, car_guest_total - db_car_count)
         print(f"[SENSOR-SMART] Fallback to DB: Motor={result['motor_available']}, Car={result['car_available']}")
         return result
     

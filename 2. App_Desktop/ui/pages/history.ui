@@ -13,178 +13,212 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QScrollArea" name="scrollArea">
-     <property name="widgetResizable"><bool>true</bool></property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>900</width>
-        <height>640</height>
+        <width>880</width>
+        <height>620</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scrollAreaLayout">
        <item>
-        <widget class="QWidget" name="filterArea">
-         <layout class="QHBoxLayout" name="horizontalLayout_filter">
-          <item>
-           <widget class="QWidget" name="filterInputs">
-            <layout class="QGridLayout" name="gridLayout_filters">
-             <item row="0" column="0">
-              <widget class="QLabel" name="lblPlate">
-               <property name="text"><string>Biển số</string></property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="historyPlate"/>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="lblDateFrom">
-               <property name="text"><string>Ngày gửi từ</string></property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QDateEdit" name="historyDateFrom">
-               <property name="calendarPopup"><bool>true</bool></property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="lblDateTo">
-               <property name="text"><string>Ngày gửi đến</string></property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QDateEdit" name="historyDateTo">
-               <property name="calendarPopup"><bool>true</bool></property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="lblTimeFrom">
-               <property name="text"><string>Giờ gửi từ</string></property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QTimeEdit" name="historyTimeFrom"/>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="lblTimeTo">
-               <property name="text"><string>Giờ gửi đến</string></property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QTimeEdit" name="historyTimeTo"/>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_filterButtons">
-            <item>
-             <widget class="QPushButton" name="btnOpenAdvancedFilter">
-              <property name="text"><string>Bộ lọc nâng cao</string></property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btnApplyFilter">
-              <property name="text"><string>Áp dụng</string></property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btnExport">
-              <property name="text"><string>Xuất Excel</string></property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_filter">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_filters">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblPlate">
+             <property name="text">
+              <string>Biển số</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="historyPlate"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblDateFrom">
+             <property name="text">
+              <string>Ngày gửi từ</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDateEdit" name="historyDateFrom">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblDateTo">
+             <property name="text">
+              <string>Ngày gửi đến</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDateEdit" name="historyDateTo">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_filterButtons">
+           <item>
+            <widget class="QPushButton" name="btnApplyFilter">
+             <property name="text">
+              <string>Áp dụng</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QWidget" name="tableArea">
-         <layout class="QVBoxLayout" name="verticalLayout_table">
-          <item>
-           <widget class="QLabel" name="lblResults">
-            <property name="text"><string>Danh sách lịch sử (0 kết quả)</string></property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTableWidget" name="historyTable">
-            <property name="columnCount"><number>14</number></property>
-            <property name="rowCount"><number>10</number></property>
-            <column>
-             <property name="text"><string>ID</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Mã thẻ</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Biển số</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Loại xe</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Ô đỗ</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Giờ vào</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Giờ ra</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Thời gian đỗ</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Loại vé</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Chủ xe</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Phí</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Thanh toán</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Trạng thái</string></property>
-            </column>
-            <column>
-             <property name="text"><string>Ảnh vào</string></property>
-            </column>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_pagination">
-            <item>
-             <widget class="QLabel" name="paginationLabel">
-              <property name="text"><string>Hiển thị 0-0 của 0 kết quả</string></property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_pages">
-              <item>
-               <widget class="QPushButton" name="btnPrevPage">
-                <property name="text"><string>Trước</string></property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnPage1">
-                <property name="text"><string>1</string></property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnNextPage">
-                <property name="text"><string>Sau</string></property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout_table">
+         <item>
+          <widget class="QLabel" name="lblResults">
+           <property name="text">
+            <string>Danh sách lịch sử (0 kết quả)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="historyTable">
+           <property name="rowCount">
+            <number>10</number>
+           </property>
+           <property name="columnCount">
+            <number>14</number>
+           </property>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <row/>
+           <column>
+            <property name="text">
+             <string>ID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Mã thẻ</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Biển số</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Loại xe</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Ô đỗ</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Giờ vào</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Giờ ra</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Thời gian đỗ</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Loại vé</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Chủ xe</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Phí</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Thanh toán</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Trạng thái</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Ảnh vào/ra</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_pagination">
+           <item>
+            <widget class="QLabel" name="paginationLabel">
+             <property name="text">
+              <string>Hiển thị 0-0 của 0 kết quả</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_pages">
+             <item>
+              <widget class="QPushButton" name="btnPrevPage">
+               <property name="text">
+                <string>Trước</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnPage1">
+               <property name="text">
+                <string>1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnNextPage">
+               <property name="text">
+                <string>Sau</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
